@@ -16,7 +16,7 @@
 |----------|--------------------------------------------------------------------|
 | Frontend | Angular 18 (Standalone Components), TypeScript, ng-zorro-antd 18 (Ant Design) |
 | Backend  | Java 17, Spring Boot 3.2, Maven, Lombok, Swagger (SpringDoc OpenAPI) |
-| Storage  | PostgreSQL 16 (Spring Data JPA + Flyway migrations)                |
+| Storage  | PostgreSQL 16                                                      |
 
 ---
 
@@ -30,8 +30,7 @@
 - [x] **Transaction History** — ราคาล็อกตอนทำรายการ, เรียงใหม่ไปเก่า, Badge BUY/SELL
 - [x] **Simulate Market** — สุ่มราคา ±5%, อัปเดต Daily Change %, พอร์ตคำนวณใหม่อัตโนมัติ
 - [x] **Unit Tests** — Backend test cases ครอบคลุม buy/sell/simulate logic
-- [x] **PostgreSQL** — Spring Data JPA, Flyway migrations (V1: schema, V2: seed data), ข้อมูลคงอยู่เมื่อ restart
-- [x] **Docker** — docker-compose พร้อม PostgreSQL + nginx (Angular) + JRE (Spring Boot)
+- [x] **PostgreSQL** — เก็บข้อมูลถาวร, ข้อมูลคงอยู่เมื่อ restart
 - [x] **UI ที่ใช้งานง่าย** — Ant Design components, Responsive layout, Toast notifications
 - [x] **API Response สม่ำเสมอ** — `{ success, data, message }` ทุก endpoint
 - [x] **Service Layer** — แยก Business logic ออกเป็น 5 services อิสระ (MarketService, OrderService, PortfolioService, StockService, TransactionService)
@@ -60,7 +59,7 @@
       ↓
    Service            ← Business logic ทั้งหมด, throw Exception เมื่อ rule ไม่ผ่าน
       ↓
-  Repository          ← Spring Data JPA, query database
+  Repository          ← query database
       ↓
   PostgreSQL          ← เก็บข้อมูลจริง
 ```
@@ -92,7 +91,7 @@ Service → throw IllegalArgumentException("Insufficient cash")
 - Java 17+
 - Maven 3.8+ (หรือใช้ `./mvnw` ที่มีให้แล้ว)
 - Node.js 18+ และ npm
-- PostgreSQL 16 (local หรือใช้ Docker — ดูด้านล่าง)
+- PostgreSQL 16 (local)
 
 ---
 
@@ -121,7 +120,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-API server จะเปิดที่ **http://localhost:8080** — Flyway จะ migrate schema และ seed ข้อมูลอัตโนมัติ
+API server จะเปิดที่ **http://localhost:8080**
 
 ### วิธี Run Test (Backend)
 
@@ -304,7 +303,7 @@ Response (error — เงินไม่พอ):
 {
   "success": false,
   "data": null,
-  "message": "Insufficient cash. Required: 50000.00, Available: 1000.00"
+  "message": "Exceeds maximum buyable quantity. Max: 202, Requested: 300"
 }
 ```
 
@@ -339,7 +338,7 @@ Mock_Stock_Trading_Platform/
 │       │   │   ├── ApiResponse.java            # wrapper { success, data, message }
 │       │   │   ├── request/OrderRequest.java
 │       │   │   └── response/                   # HoldingItem, PortfolioResponse, StockDetailResponse
-│       │   ├── repository/                     # Spring Data JPA interfaces
+│       │   ├── repository/
 │       │   ├── service/
 │       │   │   ├── MarketService.java          # สุ่มราคา ±5% ทุกหุ้น
 │       │   │   ├── OrderService.java           # buy/sell logic, weighted avg price
@@ -351,10 +350,7 @@ Mock_Stock_Trading_Platform/
 │       │   └── exception/
 │       │       └── GlobalExceptionHandler.java # @ControllerAdvice ดักจับ exception ทั่วระบบ
 │       ├── main/resources/
-│       │   ├── application.properties
-│       │   └── db/migration/
-│       │       ├── V1__init_schema.sql         # สร้างตาราง
-│       │       └── V2__seed_data.sql           # seed cash + หุ้น 10 ตัว
+│       │   └── application.properties
 │       └── test/java/com/mockstock/service/
 │           ├── MarketServiceTest.java
 │           ├── OrderServiceTest.java
@@ -363,7 +359,6 @@ Mock_Stock_Trading_Platform/
 ├── frontend/
 │   ├── angular.json
 │   ├── tsconfig.json
-│   ├── nginx.conf                              # SPA routing สำหรับ Docker
 │   └── src/
 │       ├── environments/                       # environment.ts, environment.prod.ts
 │       └── app/
@@ -396,29 +391,12 @@ Mock_Stock_Trading_Platform/
 
 ## ออกแบบข้อมูล (PostgreSQL)
 
-ระบบใช้ Flyway จัดการ schema โดย migration อยู่ที่ `backend/src/main/resources/db/migration/`
-
-| Migration | เนื้อหา |
-|-----------|---------|
-| V1__init_schema.sql | สร้างตาราง `stocks`, `portfolio_items`, `transactions`, `user_state` |
-| V2__seed_data.sql   | เริ่มต้น cash 100,000 + หุ้น 10 ตัว |
-
-### Schema ตาราง
-
 | ตาราง            | Primary Key | คำอธิบาย                                  |
 |-----------------|-------------|-------------------------------------------|
 | `stocks`        | `symbol`    | ราคาปัจจุบัน, previous, daily change, sector |
 | `user_state`    | `id` (=1)   | เงินสดของผู้ใช้                            |
 | `portfolio_items`| `symbol`   | จำนวนหุ้น + avg buy price                 |
 | `transactions`  | `id` (UUID) | ประวัติการซื้อขาย เรียงตาม timestamp DESC  |
-
-### Flyway ทำงานอย่างไร
-
-Flyway รัน migration **อัตโนมัติตอน startup** — ตรวจสอบตาราง `flyway_schema_history` ว่า migration ไหนรันไปแล้ว แล้วรันเฉพาะตัวที่ยังไม่ได้รัน ดังนั้น:
-
-- **ครั้งแรก** — รัน V1 + V2 สร้าง schema และ seed ข้อมูล
-- **ครั้งต่อไป** — ข้ามทั้งคู่ เพราะ history บอกว่ารันแล้ว
-- **เพิ่ม migration ใหม่** — สร้างไฟล์ `V3__...sql` Flyway จะรันให้อัตโนมัติ
 
 ---
 
