@@ -444,3 +444,10 @@ newAvg = (10×1000 + 5×1200) / 15 = 16000/15 = ฿1,066.67
 - เขียน Frontend unit test ด้วย Angular Testing Library + Jasmine
 - เขียน E2E test ด้วย Cypress
 - เพิ่ม `ResourceNotFoundException` สำหรับ 404 แทนการคืน `null`
+
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)

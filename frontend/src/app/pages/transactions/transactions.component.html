@@ -113,15 +113,6 @@
               <strong>{{ formatCurrency(t.totalAmount) }}</strong>
             </td>
           </tr>
-          <tr *ngIf="filteredTransactions.length === 0">
-            <td colspan="7" class="empty-cell">
-              {{
-                hasActiveFilter
-                  ? "No transactions match the filter."
-                  : "No transactions yet."
-              }}
-            </td>
-          </tr>
         </tbody>
       </nz-table>
     </nz-card>
