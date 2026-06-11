@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrderService } from '../../../core/services/order.service';
-import { HoldingItem } from '../../../core/models';
+import { HoldingItem, TradeLimits } from '../../../core/models';
 
 export type TradeMode = 'BUY' | 'SELL';
 
@@ -23,6 +23,8 @@ export class TradingDrawerComponent implements OnChanges {
   tradeForm: FormGroup;
   trading = false;
   tradeError: string | null = null;
+  tradeLimits: TradeLimits | null = null;
+  limitsLoading = false;
 
   constructor(
     private orderService: OrderService,
@@ -35,9 +37,25 @@ export class TradingDrawerComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    const becameVisible = changes['visible']?.currentValue === true && changes['visible']?.previousValue !== true;
+    const holdingChanged = changes['holding'] && this.visible;
+
     if (changes['visible']?.currentValue === true) {
       this.tradeError = null;
       this.tradeForm.reset({ quantity: 1 });
+    }
+
+    if ((becameVisible || holdingChanged) && this.holding) {
+      this.limitsLoading = true;
+      this.orderService.getLimits(this.holding.symbol).subscribe({
+        next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
+        error: () => { this.limitsLoading = false; },
+      });
+    }
+
+    if (changes['visible']?.currentValue === false) {
+      this.tradeLimits = null;
+      this.limitsLoading = false;
     }
   }
 
@@ -51,15 +69,6 @@ export class TradingDrawerComponent implements OnChanges {
     if (!this.holding) return 0;
     const qty = this.tradeForm.get('quantity')?.value as number;
     return (qty || 0) * this.holding.currentPrice;
-  }
-
-  get maxSellQty(): number {
-    return this.holding?.quantity ?? 0;
-  }
-
-  get maxBuyQty(): number {
-    if (!this.holding || this.holding.currentPrice === 0) return 0;
-    return Math.floor(this.cash / this.holding.currentPrice);
   }
 
   onTrade(): void {
@@ -79,6 +88,11 @@ export class TradingDrawerComponent implements OnChanges {
         this.trading = false;
         this.close();
         this.traded.emit();
+        this.limitsLoading = true;
+        this.orderService.getLimits(symbol).subscribe({
+          next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
+          error: () => { this.limitsLoading = false; },
+        });
       },
       error: err => { this.tradeError = err.message; this.trading = false; },
     });

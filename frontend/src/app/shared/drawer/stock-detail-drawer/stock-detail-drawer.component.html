@@ -74,64 +74,74 @@
         <!-- Buy form -->
         <ng-container *ngIf="mode === 'BUY'">
           <nz-alert *ngIf="buyError" nzType="error" [nzMessage]="buyError" nzShowIcon style="margin-bottom:12px;"></nz-alert>
-          <form nz-form [formGroup]="buyForm" nzLayout="vertical">
-            <nz-form-item>
-              <nz-form-label nzRequired>Quantity</nz-form-label>
-              <nz-form-control nzErrorTip="Enter at least 1">
-                <nz-input-number formControlName="quantity" [nzMin]="1" [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
-              </nz-form-control>
-            </nz-form-item>
-          </form>
-          <div class="estimate-box">
-            <div class="estimate-row">
-              <span class="muted-label">Available Balance</span>
-              <span class="balance-amount" [class.balance-amount--low]="cash < buyCost">
-                {{ formatCurrency(cash) }}
-              </span>
+          <nz-spin [nzSpinning]="limitsLoading">
+            <form nz-form [formGroup]="buyForm" nzLayout="vertical">
+              <nz-form-item>
+                <nz-form-label nzRequired>Quantity</nz-form-label>
+                <nz-form-control nzErrorTip="Enter at least 1">
+                  <nz-input-number formControlName="quantity"
+                                   [nzMin]="1"
+                                   [nzMax]="tradeLimits?.maxBuyQty ?? 0"
+                                   [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+            </form>
+            <div class="estimate-box">
+              <div class="estimate-row">
+                <span class="muted-label">Available Balance</span>
+                <span class="balance-amount" [class.balance-amount--low]="cash < buyCost">
+                  {{ formatCurrency(cash) }}
+                </span>
+              </div>
+              <div class="estimate-row">
+                <span class="muted-label">Estimated Cost</span>
+                <strong class="estimate-amount estimate-amount--buy">{{ formatCurrency(buyCost) }}</strong>
+              </div>
+              <p class="hint-text">Max buyable: {{ tradeLimits?.maxBuyQty ?? 0 }} shares</p>
             </div>
-            <div class="estimate-row">
-              <span class="muted-label">Estimated Cost</span>
-              <strong class="estimate-amount estimate-amount--buy">{{ formatCurrency(buyCost) }}</strong>
-            </div>
-            <p class="hint-text">Max buyable: {{ maxBuyQty }} shares</p>
-          </div>
-          <nz-alert *ngIf="cash < buyCost && buyForm.valid"
-                    nzType="warning"
-                    nzMessage="Insufficient balance"
-                    nzShowIcon
-                    style="margin-bottom:12px;">
-          </nz-alert>
-          <button nz-button nzType="primary" nzBlock nzSize="large" class="btn-buy"
-                  [nzLoading]="buying" [disabled]="buyForm.invalid || cash < buyCost" (click)="onBuy()">
-            Confirm Buy
-          </button>
+            <nz-alert *ngIf="cash < buyCost && buyForm.valid"
+                      nzType="warning"
+                      nzMessage="Insufficient balance"
+                      nzShowIcon
+                      style="margin-bottom:12px;">
+            </nz-alert>
+            <button nz-button nzType="primary" nzBlock nzSize="large" class="btn-buy"
+                    [nzLoading]="buying"
+                    [disabled]="limitsLoading || buyForm.invalid || cash < buyCost"
+                    (click)="onBuy()">
+              Confirm Buy
+            </button>
+          </nz-spin>
         </ng-container>
 
         <!-- Sell form -->
         <ng-container *ngIf="mode === 'SELL'">
           <nz-alert *ngIf="sellError" nzType="error" [nzMessage]="sellError" nzShowIcon style="margin-bottom:12px;"></nz-alert>
-          <form nz-form [formGroup]="sellForm" nzLayout="vertical">
-            <nz-form-item>
-              <nz-form-label nzRequired>Quantity</nz-form-label>
-              <nz-form-control [nzErrorTip]="'Enter 1 – ' + stock.heldQuantity">
-                <nz-input-number formControlName="quantity"
-                                 [nzMin]="1" [nzMax]="stock.heldQuantity"
-                                 [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
-              </nz-form-control>
-            </nz-form-item>
-          </form>
-          <div class="estimate-box">
-            <div class="estimate-row">
-              <span class="muted-label">Estimated Proceeds</span>
-              <strong class="estimate-amount estimate-amount--sell">{{ formatCurrency(sellProceeds) }}</strong>
+          <nz-spin [nzSpinning]="limitsLoading">
+            <form nz-form [formGroup]="sellForm" nzLayout="vertical">
+              <nz-form-item>
+                <nz-form-label nzRequired>Quantity</nz-form-label>
+                <nz-form-control [nzErrorTip]="'Enter 1 – ' + (tradeLimits?.maxSellQty ?? 0)">
+                  <nz-input-number formControlName="quantity"
+                                   [nzMin]="1" [nzMax]="tradeLimits?.maxSellQty ?? 0"
+                                   [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+            </form>
+            <div class="estimate-box">
+              <div class="estimate-row">
+                <span class="muted-label">Estimated Proceeds</span>
+                <strong class="estimate-amount estimate-amount--sell">{{ formatCurrency(sellProceeds) }}</strong>
+              </div>
+              <p class="hint-text">Max sellable: {{ tradeLimits?.maxSellQty ?? 0 }} shares</p>
             </div>
-            <p class="hint-text">Max sellable: {{ stock.heldQuantity }} shares</p>
-          </div>
-          <button nz-button nzType="primary" nzDanger nzBlock nzSize="large"
-                  [nzLoading]="selling"
-                  [disabled]="sellForm.invalid || stock.heldQuantity === 0" (click)="onSell()">
-            Confirm Sell
-          </button>
+            <button nz-button nzType="primary" nzDanger nzBlock nzSize="large"
+                    [nzLoading]="selling"
+                    [disabled]="limitsLoading || sellForm.invalid || (tradeLimits?.maxSellQty ?? 0) === 0"
+                    (click)="onSell()">
+              Confirm Sell
+            </button>
+          </nz-spin>
         </ng-container>
 
       </ng-container>

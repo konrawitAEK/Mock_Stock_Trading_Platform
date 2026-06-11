@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { StockService } from '../../../core/services/stock.service';
 import { OrderService } from '../../../core/services/order.service';
 import { PortfolioService } from '../../../core/services/portfolio.service';
-import { StockDetail } from '../../../core/models';
+import { StockDetail, TradeLimits } from '../../../core/models';
 
 type TradeMode = 'BUY' | 'SELL';
 
@@ -22,7 +22,9 @@ export class StockDetailDrawerComponent implements OnChanges {
 
   stock: StockDetail | null = null;
   cash = 0;
+  tradeLimits: TradeLimits | null = null;
   loading = false;
+  limitsLoading = false;
   error: string | null = null;
   notFound = false;
   mode: TradeMode = 'BUY';
@@ -61,8 +63,18 @@ export class StockDetailDrawerComponent implements OnChanges {
       this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
     }
 
+    if ((becameVisible || symbolChanged) && this.symbol) {
+      this.limitsLoading = true;
+      this.orderService.getLimits(this.symbol).subscribe({
+        next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
+        error: () => { this.limitsLoading = false; },
+      });
+    }
+
     if (changes['visible']?.currentValue === false) {
       this.stock = null;
+      this.tradeLimits = null;
+      this.limitsLoading = false;
       this.error = null;
       this.notFound = false;
       this.buyError = null;
@@ -99,11 +111,6 @@ export class StockDetailDrawerComponent implements OnChanges {
   get buyCost(): number {
     const qty = this.buyForm.get('quantity')?.value as number;
     return this.stock ? (qty || 0) * this.stock.currentPrice : 0;
-  }
-
-  get maxBuyQty(): number {
-    if (!this.stock || this.stock.currentPrice === 0) return 0;
-    return Math.floor(this.cash / this.stock.currentPrice);
   }
 
   get sellProceeds(): number {
@@ -151,6 +158,13 @@ export class StockDetailDrawerComponent implements OnChanges {
 
   refreshCash(): void {
     this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
+    if (this.symbol) {
+      this.limitsLoading = true;
+      this.orderService.getLimits(this.symbol).subscribe({
+        next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
+        error: () => { this.limitsLoading = false; },
+      });
+    }
   }
 
   close(): void {

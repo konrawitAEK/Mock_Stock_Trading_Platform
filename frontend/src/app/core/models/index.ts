@@ -48,6 +48,11 @@ export interface OrderRequest {
   quantity: number;
 }
 
+export interface TradeLimits {
+  maxBuyQty: number;
+  maxSellQty: number;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
