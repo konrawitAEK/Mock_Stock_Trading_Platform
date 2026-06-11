@@ -1,5 +1,21 @@
 @use '../../styles/shared' as *;
 
+::ng-deep .btn-buy.ant-btn-primary {
+  background-color: #08cc39;
+  border-color: #08cc39;
+
+  &:hover,
+  &:focus {
+    background-color: #06b832;
+    border-color: #06b832;
+  }
+
+  &:active {
+    background-color: #05a02b;
+    border-color: #05a02b;
+  }
+}
+
 .price-header {
   margin-bottom: 20px;
 }

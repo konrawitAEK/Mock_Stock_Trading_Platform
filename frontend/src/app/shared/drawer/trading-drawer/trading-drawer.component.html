@@ -19,6 +19,7 @@
       <div class="mode-toggle">
         <button nz-button
                 [nzType]="mode === 'BUY' ? 'primary' : 'default'"
+                [class.btn-buy]="mode === 'BUY'"
                 (click)="setMode('BUY')">
           <span nz-icon nzType="arrow-up"></span> Buy More
         </button>
@@ -94,6 +95,7 @@
       <button nz-button
               nzType="primary"
               [nzDanger]="mode === 'SELL'"
+              [class.btn-buy]="mode === 'BUY'"
               nzBlock
               nzSize="large"
               [nzLoading]="trading"

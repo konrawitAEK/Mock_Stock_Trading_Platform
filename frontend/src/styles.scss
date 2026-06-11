@@ -23,6 +23,10 @@ html, body {
   min-height: 100%;
 }
 
+.ant-btn > .anticon + span {
+  margin-left: 0;
+}
+
 .ant-table-thead > tr > th {
   background-color: #1b2a4a !important;
   color: #fff !important;
