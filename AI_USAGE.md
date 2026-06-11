@@ -60,74 +60,46 @@
 
 ## 3. สิ่งที่แก้ไขหลัง AI Generate
 
-1. **CORS configuration** — AI ตั้งค่าใน `application.properties` แต่ Spring Boot 3.x ต้องการ `WebMvcConfigurer` bean แก้เป็น `CorsConfig.java`
+1. **`flyway-database-postgresql` dependency** — AI เพิ่ม artifact นี้ซึ่งใช้ได้เฉพาะ Flyway 10.x แต่ Spring Boot 3.2 ใช้ Flyway 9.x ที่รองรับ PostgreSQL ใน `flyway-core` อยู่แล้ว ลบออก
 
-2. **`buildPortfolioResponse()` คำนวณ P/L ผิด** — Draft แรก hardcode `totalProfitLoss = totalPortfolioValue - 100000` แก้เป็น `stockMarketValue - totalCostBasis` ซึ่งวัด unrealized P/L บน holdings ปัจจุบันเท่านั้น
+2. **`UserState.id` type mismatch** — AI ใช้ Java `long` แต่ SQL schema ใช้ `INT` Hibernate 6 validate strict กว่า → ต้องเปลี่ยน SQL เป็น `BIGINT` และเพิ่ม V3 migration สำหรับ volume เก่า
 
-3. **Transaction sort order** — `getTransactions()` คืน list ตามลำดับ insert เปลี่ยนให้ sort by timestamp descending ใน `TradingService` เพื่อให้ทำงานถูกต้องกับทั้ง `InMemoryStore` (test) และ `JpaStore` (production)
+3. **`maxBuyQty` คำนวณใน frontend → ย้ายไป backend** — AI draft คำนวณ `maxBuyQty = floor(cash / price)` ใน Angular component โดยตรง แก้เป็นการเรียก `POST /order/limits` และรับ `TradeLimitsResponse` จาก backend แทน เพราะ price อาจ update ระหว่างที่ drawer เปิดอยู่ทำให้ค่าใน frontend stale
 
-4. **Docker base image ARM64** — `eclipse-temurin:17-jre-alpine` ไม่มี image สำหรับ ARM64 (Apple Silicon) เปลี่ยนเป็น `eclipse-temurin:17-jre-jammy`
+4. **TradeLimits endpoint รับ path variable → request body** — AI generate `GET /order/limits/{symbol}` แต่เปลี่ยนเป็น `POST /order/limits` ที่รับ `SymbolRequest` body เพื่อให้ consistent กับ pattern ของโปรเจกต์ที่ส่งข้อมูลผ่าน payload เสมอ
 
-5. **npm ci peer deps** — `ng-zorro-antd` มี peer dependency conflicts ทำให้ `npm ci` ใน Docker ล้มเหลว แก้ด้วยการเพิ่มไฟล์ `.npmrc` ที่มี `legacy-peer-deps=true`
+5. **Stock detail endpoint รับ path variable → request body** — AI generate `GET /stocks/{symbol}` แต่เปลี่ยนเป็น `POST /stocks/detail` ที่รับ `SymbolRequest` body ด้วยเหตุผลเดียวกัน
 
-6. **tsconfig.json deprecated options** — ลบ `baseUrl` และ `downlevelIteration` (deprecated ใน TypeScript 5.5+) แล้วเพิ่ม `rootDir` และแก้ `paths` alias ให้ใช้ relative path
+6. **buyStock validation — cash amount → max quantity** — AI generate ตรวจ `cash < price * quantity` คืน "Insufficient cash" แต่แก้ให้คำนวณ `maxBuyQty = floor(cash / price)` แล้วตรวจ `quantity > maxBuyQty` คืน error ที่บอก max ที่ซื้อได้ชัดเจนกว่า และ reuse logic เดิมจาก `computeMaxBuyQty()`
 
-7. **`flyway-database-postgresql` dependency** — AI เพิ่ม artifact นี้ซึ่งใช้ได้เฉพาะ Flyway 10.x แต่ Spring Boot 3.2 ใช้ Flyway 9.x ที่รองรับ PostgreSQL ใน `flyway-core` อยู่แล้ว ลบออก
+7. **Drawer ไม่ปิดหลัง trade สำเร็จ** — AI generate ไม่ได้ปิด drawer หลัง buy/sell เพิ่ม `this.closeDrawer()` และ reset state ใน success callback ของ `confirmBuy()` และ `confirmSell()`
 
-8. **`UserState.id` type mismatch** — AI ใช้ Java `long` แต่ SQL schema ใช้ `INT` Hibernate 6 validate strict กว่า → ต้องเปลี่ยน SQL เป็น `BIGINT` และเพิ่ม V3 migration สำหรับ volume เก่า
-
-9. **`StockController` inject ผิด bean** — หลัง refactor `InMemoryStore` ไม่มี `@Component` แต่ `StockController` ยังใช้ `InMemoryStore` โดยตรง แก้ให้ inject `TradingService` แทน
-
-10. **Service Split — dependency direction** — ตอนแยก `TradingService` ออกเป็น 5 services AI draft ให้ `OrderService` คำนวณ portfolio response เองซ้ำ แก้โดยให้ `OrderService` inject `PortfolioService` และ delegate การคำนวณไปที่ `PortfolioService.buildPortfolioResponse()` แทน
+8. **ตกแต่ง UI ให้ตรงกับ style ที่ต้องการ** — AI generate หน้าตา UI เบื้องต้นออกมา แต่ปรับ layout, สี, spacing และ component ต่างๆ ด้วยตัวเองให้ตรงกับ design ที่ต้องการ เช่น การจัด card, สีตัวเลขกำไร/ขาดทุน และ responsive behavior
 
 ---
 
-## 4. จุดที่ AI Generate ผิด
+## 4. กระบวนการทบทวนและปรับโครงสร้างโค้ด
 
-### ปัญหา 1: สูตร P/L hardcode
-```java
-// AI generate (ผิด)
-double totalProfitLoss = totalPortfolioValue - 100000.0;
+หลังจาก AI generate โค้ดออกมา ไม่ได้ใช้ทุกอย่างโดยตรง แต่ทำการทดลองรันจริงและนั่งอ่านโค้ดทีละส่วนก่อนนำไปใช้
 
-// แก้เป็น
-double totalProfitLoss = stockMarketValue - totalCostBasis;
-```
-**สาเหตุ:** hardcode initial capital ถ้าผู้ใช้ขายหุ้นทั้งหมด `cash - 100000` จะแสดงค่าผิด
+**ขั้นตอนที่ทำ:**
 
-### ปัญหา 2: CORS ใน application.properties
-```properties
-# AI generate (ไม่ทำงาน)
-spring.web.cors.allowed-origins=http://localhost:3000
-```
-**สาเหตุ:** Spring Boot 3.x ไม่รองรับ property นี้ preflight request คืน `403 Forbidden` ต้องใช้ `@Configuration` bean
+1. **ทดลองรันและใช้งานจริง** — รัน backend + frontend แล้วทดสอบ flow ทั้งหมดด้วยตัวเอง: ซื้อหุ้น, ขายหุ้น, ดู portfolio, simulate market เพื่อดูว่า behavior ตรงกับ spec หรือไม่
 
-### ปัญหา 3: `@ctrl/tinycolor` peer dependency หายไป
-**สาเหตุ:** AI generate `package.json` ที่มี `ng-zorro-antd` แต่ลืม peer dependency `@ctrl/tinycolor` ทำให้ build ล้มเหลว พบเฉพาะตอน build ไม่ใช่ตอน install
+2. **อ่านโค้ดทีละไฟล์** — อ่าน service, controller, component ทุกไฟล์ที่ AI generate เพื่อทำความเข้าใจ logic จริงๆ ไม่ใช่แค่เชื่อว่า AI เขียนถูก
 
-### ปัญหา 4: `changePercent` assertion precision ใน test
-```java
-// AI generate (อาจ fail)
-assertTrue(Math.abs(stock.getChangePercent()) <= 5.0);
+3. **แยกส่วนที่จำเป็นออกจากส่วนที่ไม่จำเป็น** — ตัดโค้ดที่ AI generate แต่ไม่ได้ใช้จริงออก เช่น method ซ้ำ, import ที่ไม่ใช้, logic ที่ overly complex เกินกว่า requirement
 
-// แก้เป็น
-assertTrue(Math.abs(stock.getChangePercent()) <= 5.01);
-```
-**สาเหตุ:** floating-point arithmetic ทำให้ `5.0 * 1.05` อาจเกิน 5.0 เล็กน้อย
+4. **ปรับโครงสร้างให้ตรงกับ design ที่ต้องการ** — reformat และจัดโครงสร้าง component, service ให้ตรงกับ pattern ที่วางไว้ เช่น ปรับ dependency injection ให้ถูกทิศทาง, ย้าย logic ที่อยู่ผิดที่ไปไว้ใน layer ที่เหมาะสม
 
 ---
 
 ## 5. สิ่งที่จะปรับปรุงถ้ามีเวลาเพิ่ม
 
-1. **Optimistic locking** — เพิ่ม `@Version` บน `UserState` entity เพื่อป้องกัน Race condition กรณีหลาย request ทำ buy/sell พร้อมกัน
+1. **กราฟราคาหุ้น** — เก็บ snapshot ราคาทุกครั้งที่ `simulateMarket()` ถูกเรียก แสดงเป็น line chart บนหน้า Stock Detail ด้วย ng2-charts
 
-2. **กราฟราคาหุ้น** — เก็บ snapshot ราคาทุกครั้งที่ `simulateMarket()` ถูกเรียก แสดงเป็น line chart บนหน้า Stock Detail ด้วย ng2-charts
+2. **Real-time update** — แทน "Simulate Market" ด้วย auto-simulate mode ผ่าน Server-Sent Events (SSE) หรือ WebSocket
 
-3. **Real-time update** — แทน "Simulate Market" ด้วย auto-simulate mode ผ่าน Server-Sent Events (SSE) หรือ WebSocket
+3. **Authentication** — เพิ่ม Spring Security + JWT, เพิ่ม `userId` FK บน `portfolio_items` และ `transactions` รองรับ multi-user
 
-4. **Authentication** — เพิ่ม Spring Security + JWT, เพิ่ม `userId` FK บน `portfolio_items` และ `transactions` รองรับ multi-user
-
-5. **Frontend unit tests** — เขียน Jasmine/Karma tests สำหรับ Angular services และ component tests
-
-6. **E2E tests** — เพิ่ม Cypress tests ครอบคลุม flow ซื้อ → portfolio update → transaction history → simulate market
-
-7. **`ResourceNotFoundException`** — เพิ่ม custom exception สำหรับ 404 (stock not found, holding not found) แทนการคืน `null` หรือใช้ `IllegalArgumentException` ซึ่ง semantic ไม่ตรงกับ HTTP 404
+4. **`ResourceNotFoundException`** — เพิ่ม custom exception สำหรับ 404 (stock not found, holding not found) แทนการใช้ `IllegalArgumentException` ซึ่ง semantic ไม่ตรงกับ HTTP 404
