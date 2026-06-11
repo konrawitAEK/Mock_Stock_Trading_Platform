@@ -5,6 +5,11 @@ import { RouterModule } from "@angular/router";
 
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMenuModule } from "ng-zorro-antd/menu";
+import {
+  DashboardOutline,
+  RiseOutline,
+  SwapOutline,
+} from "@ant-design/icons-angular/icons";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzDrawerModule } from "ng-zorro-antd/drawer";
 import { NzButtonModule } from "ng-zorro-antd/button";
@@ -54,6 +59,7 @@ const NZ_MODULES = [
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
+    NzIconModule.forRoot([DashboardOutline, RiseOutline, SwapOutline]),
     ...NZ_MODULES,
   ],
   exports: [

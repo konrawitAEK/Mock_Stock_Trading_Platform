@@ -10,15 +10,15 @@
     </div>
     <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
       <li nz-menu-item routerLink="/" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{exact:true}">
-        <span nz-icon nzType="dashboard"></span>
+        <span nz-icon nzType="dashboard" nzTheme="outline"></span>
         <span>Dashboard</span>
       </li>
       <li nz-menu-item routerLink="/stocks" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="stock"></span>
+        <span nz-icon nzType="rise" nzTheme="outline"></span>
         <span>Stocks Market</span>
       </li>
       <li nz-menu-item routerLink="/transactions" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="history"></span>
+        <span nz-icon nzType="swap" nzTheme="outline"></span>
         <span>Transactions History</span>
       </li>
     </ul>
