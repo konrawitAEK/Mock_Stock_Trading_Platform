@@ -96,14 +96,14 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Buy fails: insufficient cash")
+    @DisplayName("Buy fails: exceeds maximum buyable quantity")
     void buyStock_insufficientCash() {
         when(stockRepo.findById("NVDA")).thenReturn(Optional.of(nvda));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> orderService.buyStock("NVDA", 300));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("insufficient cash"));
+        assertTrue(ex.getMessage().toLowerCase().contains("exceeds maximum buyable quantity"));
         verify(portfolioService, never()).setCash(any());
         verify(portfolioRepo, never()).save(any());
         verify(txRepo, never()).save(any());
@@ -176,7 +176,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Sell fails: exceed held quantity")
+    @DisplayName("Sell fails: exceeds maximum sellable quantity")
     void sellStock_exceedQuantity() {
         PortfolioItem holding = new PortfolioItem("AAPL", 5, BigDecimal.valueOf(182.50));
         when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
@@ -185,7 +185,7 @@ class OrderServiceTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> orderService.sellStock("AAPL", 10));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("insufficient shares"));
+        assertTrue(ex.getMessage().toLowerCase().contains("exceeds maximum sellable quantity"));
         verify(portfolioRepo, never()).save(any());
         verify(txRepo, never()).save(any());
     }

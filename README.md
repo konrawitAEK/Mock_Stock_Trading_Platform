@@ -130,10 +130,66 @@ cd backend
 ./mvnw test
 ```
 
-ดูผลแบบ verbose:
+ดูผลแบบ verbose (แนะนำ):
 
 ```bash
 ./mvnw test -Dsurefire.useFile=false
+```
+
+ผลที่ควรได้:
+
+```
+Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+> **หมายเหตุ:** Test ไม่ต้องเชื่อมต่อ PostgreSQL — ใช้ Mockito mock ทุก repository ดังนั้นรันได้ทันทีโดยไม่ต้องเปิด database
+
+---
+
+### Test Coverage — ครอบคลุมอะไรบ้าง
+
+ไฟล์ test อยู่ที่ `backend/src/test/java/com/mockstock/service/`
+
+#### `OrderServiceTest` (12 test cases)
+
+| กลุ่ม | Test | สิ่งที่ตรวจสอบ |
+|-------|------|----------------|
+| **BUY ✅** | `buyStock_success` | เงินหักถูก, หุ้น save, transaction บันทึก |
+| **BUY ✅** | `buyStock_avgPriceRecalculated` | Weighted avg price คำนวณถูกเมื่อซื้อซ้ำ |
+| **BUY ❌** | `buyStock_insufficientCash` | throw เมื่อเงินไม่พอ, ไม่มีการ save ใดๆ |
+| **BUY ❌** | `buyStock_invalidQuantityZero` | throw เมื่อ quantity = 0 |
+| **BUY ❌** | `buyStock_invalidQuantityNegative` | throw เมื่อ quantity ติดลบ |
+| **BUY ❌** | `buyStock_stockNotFound` | throw เมื่อ symbol ไม่มีในระบบ |
+| **SELL ✅** | `sellStock_success` | เงินเพิ่มถูก, จำนวนหุ้นลด, transaction บันทึก |
+| **SELL ✅** | `sellStock_holdingDeletedWhenAllSold` | ลบ portfolio item เมื่อขายหมด |
+| **SELL ❌** | `sellStock_exceedQuantity` | throw เมื่อขายเกินจำนวนที่ถือ |
+| **SELL ❌** | `sellStock_notHeld` | throw เมื่อไม่มีหุ้นตัวนั้นในพอร์ต |
+| **SELL ❌** | `sellStock_invalidQuantityZero` | throw เมื่อ quantity = 0 |
+| **SELL ❌** | `sellStock_stockNotFound` | throw เมื่อ symbol ไม่มีในระบบ |
+
+#### `MarketServiceTest` (2 test cases)
+
+| Test | สิ่งที่ตรวจสอบ |
+|------|----------------|
+| `simulateMarket_pricesWithinBounds` | ราคาใหม่อยู่ในช่วง ±5%, ราคาต่ำสุด 0.01 |
+| `simulateMarket_fieldsUpdated` | `previousPrice` และ `dailyChange` อัปเดตถูกต้อง |
+
+#### `TransactionServiceTest` (1 test case)
+
+| Test | สิ่งที่ตรวจสอบ |
+|------|----------------|
+| `getTransactions_newestFirst` | คืน transaction เรียงจากใหม่ไปเก่า |
+
+---
+
+### ลำดับ Test ที่แนะนำ (จากง่ายไปซับซ้อน)
+
+```
+1. TransactionServiceTest    — ง่ายที่สุด: ทดสอบ query + ordering
+2. MarketServiceTest         — ทดสอบ price randomization + field update
+3. OrderServiceTest (BUY)    — ทดสอบ buy logic: happy path → validation → error
+4. OrderServiceTest (SELL)   — ทดสอบ sell logic: happy path → validation → error
 ```
 
 ---
