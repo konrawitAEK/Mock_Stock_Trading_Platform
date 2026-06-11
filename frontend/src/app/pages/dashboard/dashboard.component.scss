@@ -1,0 +1,23 @@
+@use '../../shared/styles/shared' as *;
+
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stat-label {
+  color: #8c8c8c;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+
+  &--primary { color: #1677ff; }
+}
+
+.btn-buy {
+  margin-right: 8px;
+}

@@ -1,0 +1,98 @@
+// ─── Page layout ───────────────────────────────────────────────────────────────
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+// ─── Common utilities ───────────────────────────────────────────────────────────
+
+.muted-label {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.empty-cell {
+  text-align: center;
+  color: #bfbfbf;
+  padding: 40px;
+}
+
+// ─── Drawer: info box ──────────────────────────────────────────────────────────
+
+.info-box {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-label {
+  margin: 0 0 12px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #8c8c8c;
+  letter-spacing: 0.05em;
+}
+
+// ─── Drawer: trade controls ────────────────────────────────────────────────────
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  button {
+    flex: 1;
+  }
+}
+
+.estimate-box {
+  background: #f0f5ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.estimate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.estimate-amount {
+  font-size: 18px;
+
+  &--buy  { color: #1677ff; }
+  &--sell { color: #52c41a; }
+}
+
+.hint-text {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8c8c8c;
+}

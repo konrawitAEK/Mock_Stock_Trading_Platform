@@ -1,6 +1,6 @@
 <nz-spin [nzSpinning]="loading">
   <div class="page-container">
-    <h2 style="margin:0 0 24px;font-size:22px;font-weight:700;">Transaction History</h2>
+    <h2 class="page-title-mb">Transaction History</h2>
 
     <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
 
@@ -20,7 +20,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let t of txTable.data">
-            <td style="white-space:nowrap;font-size:13px;">{{ formatDate(t.timestamp) }}</td>
+            <td class="date-cell">{{ formatDate(t.timestamp) }}</td>
             <td>
               <nz-tag [nzColor]="t.type === 'BUY' ? 'success' : 'error'">{{ t.type }}</nz-tag>
             </td>
@@ -31,7 +31,7 @@
             <td><strong>{{ formatCurrency(t.totalAmount) }}</strong></td>
           </tr>
           <tr *ngIf="transactions.length === 0">
-            <td colspan="7" style="text-align:center;color:#bfbfbf;padding:40px;">
+            <td colspan="7" class="empty-cell">
               No transactions yet.
             </td>
           </tr>

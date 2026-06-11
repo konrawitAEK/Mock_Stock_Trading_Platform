@@ -1,29 +1,39 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { PortfolioService } from '../../core/services/portfolio.service';
-import { MarketService } from '../../core/services/market.service';
-import { HoldingItem, PortfolioResponse } from '../../core/models';
-import { TradingDrawerComponent, TradeMode } from '../../shared/trading-drawer/trading-drawer.component';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { NzTableModule } from "ng-zorro-antd/table";
+import { NzCardModule } from "ng-zorro-antd/card";
+import { NzButtonModule } from "ng-zorro-antd/button";
+import { NzSpinModule } from "ng-zorro-antd/spin";
+import { NzAlertModule } from "ng-zorro-antd/alert";
+import { NzTagModule } from "ng-zorro-antd/tag";
+import { NzIconModule } from "ng-zorro-antd/icon";
+import { NzGridModule } from "ng-zorro-antd/grid";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { PortfolioService } from "../../core/services/portfolio.service";
+import { MarketService } from "../../core/services/market.service";
+import { HoldingItem, PortfolioResponse } from "../../core/models";
+import {
+  TradingDrawerComponent,
+  TradeMode,
+} from "../../shared/trading-drawer/trading-drawer.component";
 
 @Component({
-  selector: 'app-dashboard',
+  selector: "app-dashboard",
   standalone: true,
   imports: [
     CommonModule,
-    NzTableModule, NzCardModule, NzButtonModule,
-    NzSpinModule, NzAlertModule, NzTagModule, NzIconModule, NzGridModule,
+    NzTableModule,
+    NzCardModule,
+    NzButtonModule,
+    NzSpinModule,
+    NzAlertModule,
+    NzTagModule,
+    NzIconModule,
+    NzGridModule,
     TradingDrawerComponent,
   ],
-  templateUrl: './dashboard.component.html',
+  templateUrl: "./dashboard.component.html",
+  styleUrl: "./dashboard.component.scss",
 })
 export class DashboardComponent implements OnInit {
   portfolio: PortfolioResponse | null = null;
@@ -32,7 +42,7 @@ export class DashboardComponent implements OnInit {
   error: string | null = null;
 
   drawerVisible = false;
-  drawerMode: TradeMode = 'BUY';
+  drawerMode: TradeMode = "BUY";
   selectedHolding: HoldingItem | null = null;
 
   constructor(
@@ -49,8 +59,14 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     this.error = null;
     this.portfolioService.get().subscribe({
-      next: data => { this.portfolio = data; this.loading = false; },
-      error: err => { this.error = err.message; this.loading = false; },
+      next: (data) => {
+        this.portfolio = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.message;
+        this.loading = false;
+      },
     });
   }
 
@@ -58,11 +74,14 @@ export class DashboardComponent implements OnInit {
     this.simulating = true;
     this.marketService.simulate().subscribe({
       next: () => {
-        this.message.success('Market prices updated!');
+        this.message.success("Market prices updated!");
         this.loadPortfolio();
         this.simulating = false;
       },
-      error: err => { this.error = err.message; this.simulating = false; },
+      error: (err) => {
+        this.error = err.message;
+        this.simulating = false;
+      },
     });
   }
 
@@ -77,8 +96,16 @@ export class DashboardComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return '฿' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (
+      "฿" +
+      value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
   }
 
-  isProfitable(val: number): boolean { return val >= 0; }
+  isProfitable(val: number): boolean {
+    return val >= 0;
+  }
 }

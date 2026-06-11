@@ -1,0 +1,33 @@
+<nz-layout class="app-layout">
+  <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed" [nzTrigger]="null" nzWidth="220px" nzTheme="dark">
+    <div class="sider-logo">
+      <span *ngIf="!isCollapsed">📈 MockStock</span>
+      <span *ngIf="isCollapsed">📈</span>
+    </div>
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      <li nz-menu-item routerLink="/" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{exact:true}">
+        <span nz-icon nzType="dashboard"></span>
+        <span>Dashboard</span>
+      </li>
+      <li nz-menu-item routerLink="/stocks" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="stock"></span>
+        <span>Stocks</span>
+      </li>
+      <li nz-menu-item routerLink="/transactions" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="history"></span>
+        <span>Transactions</span>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header class="app-header">
+      <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+        class="collapse-trigger"
+        (click)="isCollapsed = !isCollapsed">
+      </span>
+    </nz-header>
+    <nz-content class="app-content">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
+</nz-layout>

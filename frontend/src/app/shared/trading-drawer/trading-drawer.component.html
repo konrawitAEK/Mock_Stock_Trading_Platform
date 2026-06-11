@@ -16,41 +16,41 @@
     <ng-container *ngIf="holding">
 
       <!-- Mode Toggle -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <div class="mode-toggle">
         <button nz-button
                 [nzType]="mode === 'BUY' ? 'primary' : 'default'"
-                style="flex:1;" (click)="setMode('BUY')">
+                (click)="setMode('BUY')">
           <span nz-icon nzType="arrow-up"></span> Buy More
         </button>
         <button nz-button
                 [nzType]="mode === 'SELL' ? 'primary' : 'default'"
                 [nzDanger]="mode === 'SELL'"
-                style="flex:1;" (click)="setMode('SELL')">
+                (click)="setMode('SELL')">
           <span nz-icon nzType="arrow-down"></span> Sell
         </button>
       </div>
 
       <!-- Stock Info -->
-      <div style="background:#fafafa;border-radius:8px;padding:16px;margin-bottom:20px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="color:#8c8c8c;font-size:13px;">Symbol</span>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="muted-label">Symbol</span>
           <strong>{{ holding.symbol }}</strong>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="color:#8c8c8c;font-size:13px;">Company</span>
+        <div class="info-row">
+          <span class="muted-label">Company</span>
           <span>{{ holding.companyName }}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="color:#8c8c8c;font-size:13px;">Current Price</span>
+        <div class="info-row">
+          <span class="muted-label">Current Price</span>
           <strong>{{ formatCurrency(holding.currentPrice) }}</strong>
         </div>
         <nz-divider style="margin:12px 0;"></nz-divider>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="color:#8c8c8c;font-size:13px;">Holdings</span>
+        <div class="info-row">
+          <span class="muted-label">Holdings</span>
           <span>{{ holding.quantity }} shares</span>
         </div>
-        <div style="display:flex;justify-content:space-between;">
-          <span style="color:#8c8c8c;font-size:13px;">Avg Buy Price</span>
+        <div class="info-row">
+          <span class="muted-label">Avg Buy Price</span>
           <span>{{ formatCurrency(holding.avgBuyPrice) }}</span>
         </div>
       </div>
@@ -73,17 +73,17 @@
       </form>
 
       <!-- Total Cost / Proceeds -->
-      <div style="background:#f0f5ff;border-radius:8px;padding:16px;margin-bottom:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="color:#8c8c8c;font-size:13px;">
+      <div class="estimate-box">
+        <div class="estimate-row">
+          <span class="muted-label">
             {{ mode === 'BUY' ? 'Estimated Cost' : 'Estimated Proceeds' }}
           </span>
-          <strong style="font-size:18px;"
-                  [style.color]="mode === 'BUY' ? '#1677ff' : '#52c41a'">
+          <strong class="estimate-amount"
+                  [ngClass]="mode === 'BUY' ? 'estimate-amount--buy' : 'estimate-amount--sell'">
             {{ formatCurrency(tradeTotal) }}
           </strong>
         </div>
-        <p *ngIf="mode === 'SELL'" style="margin:8px 0 0;font-size:12px;color:#8c8c8c;">
+        <p *ngIf="mode === 'SELL'" class="hint-text">
           Max sellable: {{ maxSellQty }} shares
         </p>
       </div>

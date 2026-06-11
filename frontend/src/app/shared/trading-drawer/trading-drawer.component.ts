@@ -23,6 +23,7 @@ export type TradeMode = 'BUY' | 'SELL';
     NzFormModule, NzDividerModule, NzAlertModule, NzIconModule,
   ],
   templateUrl: './trading-drawer.component.html',
+  styleUrl: './trading-drawer.component.scss',
 })
 export class TradingDrawerComponent implements OnChanges {
   @Input() visible = false;

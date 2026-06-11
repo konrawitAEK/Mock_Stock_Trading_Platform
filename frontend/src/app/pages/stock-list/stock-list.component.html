@@ -1,9 +1,9 @@
 <nz-spin [nzSpinning]="loading">
   <div class="page-container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div class="page-header">
       <div>
-        <h2 style="margin:0;font-size:22px;font-weight:700;">Stock Market</h2>
-        <p style="margin:0;color:#8c8c8c;font-size:13px;">{{ stocks.length }} stocks available</p>
+        <h2 class="page-title">Stock Market</h2>
+        <p class="page-subtitle">{{ stocks.length }} stocks available</p>
       </div>
       <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
         <span nz-icon nzType="thunderbolt"></span>
@@ -13,7 +13,7 @@
 
     <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
 
-    <nz-card style="margin-bottom:16px;">
+    <nz-card class="search-card">
       <nz-input-group [nzPrefix]="searchIcon">
         <input nz-input placeholder="Search by symbol or company..." [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
       </nz-input-group>
@@ -32,8 +32,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let s of stockTable.data" style="cursor:pointer;" (click)="openDrawer(s.symbol)">
-          <td><span style="font-weight:700;color:#1677ff;">{{ s.symbol }}</span></td>
+        <tr *ngFor="let s of stockTable.data" (click)="openDrawer(s.symbol)">
+          <td><span class="symbol-link">{{ s.symbol }}</span></td>
           <td>{{ s.companyName }}</td>
           <td><strong>{{ formatCurrency(s.currentPrice) }}</strong></td>
           <td>

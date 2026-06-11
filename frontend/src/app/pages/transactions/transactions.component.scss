@@ -1,0 +1,12 @@
+@use '../../shared/styles/shared' as *;
+
+.page-title-mb {
+  margin: 0 0 24px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.date-cell {
+  white-space: nowrap;
+  font-size: 13px;
+}

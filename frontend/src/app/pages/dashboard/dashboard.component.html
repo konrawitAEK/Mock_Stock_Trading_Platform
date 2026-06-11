@@ -1,10 +1,10 @@
 <nz-spin [nzSpinning]="loading">
   <div class="page-container">
     <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div class="page-header">
       <div>
-        <h2 style="margin:0;font-size:22px;font-weight:700;">Dashboard</h2>
-        <p style="margin:0;color:#8c8c8c;font-size:13px;">Overview of your portfolio performance</p>
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-subtitle">Overview of your portfolio performance</p>
       </div>
       <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
         <span nz-icon nzType="thunderbolt"></span>
@@ -16,30 +16,29 @@
 
     <ng-container *ngIf="portfolio">
       <!-- Stats -->
-      <div nz-row [nzGutter]="16" style="margin-bottom:24px;">
+      <div nz-row [nzGutter]="16" class="stats-row">
         <div nz-col [nzSpan]="6">
           <nz-card>
-            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Cash Balance</p>
-            <p style="font-size:22px;font-weight:700;margin:0;">{{ formatCurrency(portfolio.cash) }}</p>
+            <p class="stat-label">Cash Balance</p>
+            <p class="stat-value">{{ formatCurrency(portfolio.cash) }}</p>
           </nz-card>
         </div>
         <div nz-col [nzSpan]="6">
           <nz-card>
-            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Stock Market Value</p>
-            <p style="font-size:22px;font-weight:700;margin:0;">{{ formatCurrency(portfolio.stockMarketValue) }}</p>
+            <p class="stat-label">Stock Market Value</p>
+            <p class="stat-value">{{ formatCurrency(portfolio.stockMarketValue) }}</p>
           </nz-card>
         </div>
         <div nz-col [nzSpan]="6">
           <nz-card>
-            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Total Portfolio Value</p>
-            <p style="font-size:22px;font-weight:700;margin:0;color:#1677ff;">{{ formatCurrency(portfolio.totalPortfolioValue) }}</p>
+            <p class="stat-label">Total Portfolio Value</p>
+            <p class="stat-value stat-value--primary">{{ formatCurrency(portfolio.totalPortfolioValue) }}</p>
           </nz-card>
         </div>
         <div nz-col [nzSpan]="6">
           <nz-card>
-            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Total P / L</p>
-            <p style="font-size:22px;font-weight:700;margin:0;"
-               [style.color]="isProfitable(portfolio.totalProfitLoss) ? '#52c41a' : '#ff4d4f'">
+            <p class="stat-label">Total P / L</p>
+            <p class="stat-value" [ngClass]="isProfitable(portfolio.totalProfitLoss) ? 'text-success' : 'text-danger'">
               {{ (isProfitable(portfolio.totalProfitLoss) ? '+' : '') + formatCurrency(portfolio.totalProfitLoss) }}
             </p>
           </nz-card>
@@ -69,11 +68,11 @@
               <td>{{ formatCurrency(h.avgBuyPrice) }}</td>
               <td>{{ formatCurrency(h.currentPrice) }}</td>
               <td><strong>{{ formatCurrency(h.marketValue) }}</strong></td>
-              <td [style.color]="isProfitable(h.profitLoss) ? '#52c41a' : '#ff4d4f'">
+              <td [ngClass]="isProfitable(h.profitLoss) ? 'text-success' : 'text-danger'">
                 <strong>{{ (isProfitable(h.profitLoss) ? '+' : '') + formatCurrency(h.profitLoss) }}</strong>
               </td>
               <td>
-                <button nz-button nzType="primary" nzSize="small" (click)="openDrawer(h, 'BUY')" style="margin-right:8px;">
+                <button nz-button nzType="primary" nzSize="small" (click)="openDrawer(h, 'BUY')" class="btn-buy">
                   <span nz-icon nzType="arrow-up"></span> Buy
                 </button>
                 <button nz-button nzDanger nzSize="small" (click)="openDrawer(h, 'SELL')">
@@ -82,7 +81,7 @@
               </td>
             </tr>
             <tr *ngIf="portfolio.holdings.length === 0">
-              <td colspan="8" style="text-align:center;color:#bfbfbf;padding:40px;">
+              <td colspan="8" class="empty-cell">
                 No holdings — buy some stocks to get started.
               </td>
             </tr>

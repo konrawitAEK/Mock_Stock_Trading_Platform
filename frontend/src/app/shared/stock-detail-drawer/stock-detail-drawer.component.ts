@@ -26,6 +26,7 @@ type TradeMode = 'BUY' | 'SELL';
     NzFormModule, NzDividerModule, NzAlertModule, NzIconModule, NzTagModule, NzSpinModule,
   ],
   templateUrl: './stock-detail-drawer.component.html',
+  styleUrl: './stock-detail-drawer.component.scss',
 })
 export class StockDetailDrawerComponent implements OnChanges {
   @Input() visible = false;

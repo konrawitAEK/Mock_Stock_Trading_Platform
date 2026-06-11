@@ -1,0 +1,14 @@
+@use '../../shared/styles/shared' as *;
+
+.search-card {
+  margin-bottom: 16px;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+.symbol-link {
+  font-weight: 700;
+  color: #1677ff;
+}

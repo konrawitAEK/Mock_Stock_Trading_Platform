@@ -13,6 +13,7 @@ import { Transaction } from '../../core/models';
   standalone: true,
   imports: [CommonModule, NzTableModule, NzTagModule, NzSpinModule, NzAlertModule, NzCardModule],
   templateUrl: './transactions.component.html',
+  styleUrl: './transactions.component.scss',
 })
 export class TransactionsComponent implements OnInit {
   transactions: Transaction[] = [];
