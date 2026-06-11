@@ -25,7 +25,7 @@ class TransactionServiceTest {
     @InjectMocks TransactionService transactionService;
 
     @Test
-    @DisplayName("Transactions: returned newest-first from repository")
+    @DisplayName("1. Transactions: returned newest-first from repository")
     void getTransactions_newestFirst() {
         Transaction buy  = new Transaction("1", LocalDateTime.now().minusMinutes(2),
                 TransactionType.BUY,  "AAPL", "Apple", 5, BigDecimal.valueOf(182.50), BigDecimal.valueOf(912.50));

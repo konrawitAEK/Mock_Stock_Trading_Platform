@@ -27,7 +27,7 @@ class MarketServiceTest {
     private final Stock tsla = new Stock("TSLA", "Tesla Inc.",   BigDecimal.valueOf(238.00), "Automotive", "Tesla");
 
     @Test
-    @DisplayName("Simulate market: prices change within ±5%")
+    @DisplayName("1. Simulate market: prices change within ±5%")
     void simulateMarket_pricesWithinBounds() {
         Stock msft = new Stock("MSFT", "Microsoft", BigDecimal.valueOf(375.20), "Tech", "MS");
         when(stockRepo.findAll()).thenReturn(List.of(aapl, tsla, msft));
@@ -43,7 +43,7 @@ class MarketServiceTest {
     }
 
     @Test
-    @DisplayName("Simulate market: previousPrice and dailyChange updated correctly")
+    @DisplayName("2. Simulate market: previousPrice and dailyChange updated correctly")
     void simulateMarket_fieldsUpdated() {
         BigDecimal originalPrice = aapl.getCurrentPrice();
         when(stockRepo.findAll()).thenReturn(List.of(aapl));

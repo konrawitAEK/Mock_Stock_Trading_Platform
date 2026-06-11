@@ -54,7 +54,7 @@ class OrderServiceTest {
     // =========================================================================
 
     @Test
-    @DisplayName("Buy success: cash decreases, holding saved, transaction recorded")
+    @DisplayName("1. Buy success: cash decreases, holding saved, transaction recorded")
     void buyStock_success() {
         when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
         when(portfolioRepo.findById("AAPL")).thenReturn(Optional.empty());
@@ -79,7 +79,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Buy success: avg price recalculated correctly on second purchase")
+    @DisplayName("2. Buy success: avg price recalculated correctly on second purchase")
     void buyStock_avgPriceRecalculated() {
         PortfolioItem existing = new PortfolioItem("AAPL", 10, BigDecimal.valueOf(182.50));
         when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
@@ -96,7 +96,32 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Buy fails: exceeds maximum buyable quantity")
+    @DisplayName("3. Buy fails: invalid quantity (zero)")
+    void buyStock_invalidQuantityZero() {
+        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", 0));
+        verify(stockRepo, never()).findById(anyString());
+    }
+
+    @Test
+    @DisplayName("4. Buy fails: invalid quantity (negative)")
+    void buyStock_invalidQuantityNegative() {
+        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", -5));
+        verify(stockRepo, never()).findById(anyString());
+    }
+
+    @Test
+    @DisplayName("5. Buy fails: stock symbol not found")
+    void buyStock_stockNotFound() {
+        when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> orderService.buyStock("UNKNOWN", 10));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("not found"));
+    }
+
+    @Test
+    @DisplayName("6. Buy fails: exceeds maximum buyable quantity")
     void buyStock_insufficientCash() {
         when(stockRepo.findById("NVDA")).thenReturn(Optional.of(nvda));
 
@@ -109,37 +134,12 @@ class OrderServiceTest {
         verify(txRepo, never()).save(any());
     }
 
-    @Test
-    @DisplayName("Buy fails: invalid quantity (zero)")
-    void buyStock_invalidQuantityZero() {
-        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", 0));
-        verify(stockRepo, never()).findById(anyString());
-    }
-
-    @Test
-    @DisplayName("Buy fails: invalid quantity (negative)")
-    void buyStock_invalidQuantityNegative() {
-        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", -5));
-        verify(stockRepo, never()).findById(anyString());
-    }
-
-    @Test
-    @DisplayName("Buy fails: stock symbol not found")
-    void buyStock_stockNotFound() {
-        when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> orderService.buyStock("UNKNOWN", 10));
-
-        assertTrue(ex.getMessage().toLowerCase().contains("not found"));
-    }
-
     // =========================================================================
     // SELL TESTS
     // =========================================================================
 
     @Test
-    @DisplayName("Sell success: cash increases, holding reduced, transaction recorded")
+    @DisplayName("7. Sell success: cash increases, holding reduced, transaction recorded")
     void sellStock_success() {
         PortfolioItem holding = new PortfolioItem("TSLA", 20, BigDecimal.valueOf(238.00));
         when(stockRepo.findById("TSLA")).thenReturn(Optional.of(tsla));
@@ -163,7 +163,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Sell success: holding deleted when all shares sold")
+    @DisplayName("8. Sell success: holding deleted when all shares sold")
     void sellStock_holdingDeletedWhenAllSold() {
         PortfolioItem holding = new PortfolioItem("TSLA", 5, BigDecimal.valueOf(238.00));
         when(stockRepo.findById("TSLA")).thenReturn(Optional.of(tsla));
@@ -176,22 +176,25 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Sell fails: exceeds maximum sellable quantity")
-    void sellStock_exceedQuantity() {
-        PortfolioItem holding = new PortfolioItem("AAPL", 5, BigDecimal.valueOf(182.50));
-        when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
-        when(portfolioRepo.findById("AAPL")).thenReturn(Optional.of(holding));
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> orderService.sellStock("AAPL", 10));
-
-        assertTrue(ex.getMessage().toLowerCase().contains("exceeds maximum sellable quantity"));
-        verify(portfolioRepo, never()).save(any());
-        verify(txRepo, never()).save(any());
+    @DisplayName("9. Sell fails: invalid quantity (zero)")
+    void sellStock_invalidQuantityZero() {
+        assertThrows(IllegalArgumentException.class, () -> orderService.sellStock("AAPL", 0));
+        verify(stockRepo, never()).findById(anyString());
     }
 
     @Test
-    @DisplayName("Sell fails: stock not held")
+    @DisplayName("10. Sell fails: stock symbol not found")
+    void sellStock_stockNotFound() {
+        when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> orderService.sellStock("UNKNOWN", 5));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("not found"));
+    }
+
+    @Test
+    @DisplayName("11. Sell fails: stock not held")
     void sellStock_notHeld() {
         when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
         when(portfolioRepo.findById("AAPL")).thenReturn(Optional.empty());
@@ -203,20 +206,17 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Sell fails: invalid quantity (zero)")
-    void sellStock_invalidQuantityZero() {
-        assertThrows(IllegalArgumentException.class, () -> orderService.sellStock("AAPL", 0));
-        verify(stockRepo, never()).findById(anyString());
-    }
-
-    @Test
-    @DisplayName("Sell fails: stock symbol not found")
-    void sellStock_stockNotFound() {
-        when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
+    @DisplayName("12. Sell fails: exceeds maximum sellable quantity")
+    void sellStock_exceedQuantity() {
+        PortfolioItem holding = new PortfolioItem("AAPL", 5, BigDecimal.valueOf(182.50));
+        when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
+        when(portfolioRepo.findById("AAPL")).thenReturn(Optional.of(holding));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> orderService.sellStock("UNKNOWN", 5));
+                () -> orderService.sellStock("AAPL", 10));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("not found"));
+        assertTrue(ex.getMessage().toLowerCase().contains("exceeds maximum sellable quantity"));
+        verify(portfolioRepo, never()).save(any());
+        verify(txRepo, never()).save(any());
     }
 }
