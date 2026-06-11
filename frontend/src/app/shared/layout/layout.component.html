@@ -1,23 +1,53 @@
 <nz-layout class="app-layout">
-  <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed" [nzTrigger]="null" nzWidth="220px" [nzCollapsedWidth]="50" nzTheme="dark">
+  <nz-sider
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+    nzWidth="220px"
+    [nzCollapsedWidth]="50"
+    nzTheme="dark"
+  >
     <div class="sider-logo">
-      <button class="hamburger-btn" [class.is-open]="!isCollapsed" (click)="isCollapsed = !isCollapsed" aria-label="Toggle menu">
+      <button
+        class="hamburger-btn"
+        [class.is-open]="!isCollapsed"
+        (click)="isCollapsed = !isCollapsed"
+        aria-label="Toggle menu"
+      >
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
       <span class="logo-text" *ngIf="!isCollapsed">📈 MockStock</span>
     </div>
-    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-menu-item routerLink="/" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{exact:true}">
+    <ul
+      nz-menu
+      nzTheme="dark"
+      nzMode="inline"
+      [nzInlineCollapsed]="isCollapsed"
+    >
+      <li
+        nz-menu-item
+        routerLink="/"
+        routerLinkActive="ant-menu-item-selected"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
         <span nz-icon nzType="dashboard" nzTheme="outline"></span>
         <span>Dashboard</span>
       </li>
-      <li nz-menu-item routerLink="/stocks" routerLinkActive="ant-menu-item-selected">
+      <li
+        nz-menu-item
+        routerLink="/stocks"
+        routerLinkActive="ant-menu-item-selected"
+      >
         <span nz-icon nzType="rise" nzTheme="outline"></span>
         <span>Stocks Market</span>
       </li>
-      <li nz-menu-item routerLink="/transactions" routerLinkActive="ant-menu-item-selected">
+      <li
+        nz-menu-item
+        routerLink="/transactions"
+        routerLinkActive="ant-menu-item-selected"
+      >
         <span nz-icon nzType="swap" nzTheme="outline"></span>
         <span>Transactions History</span>
       </li>

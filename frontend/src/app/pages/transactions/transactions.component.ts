@@ -14,6 +14,10 @@ export class TransactionsComponent implements OnInit {
 
   filterSymbol = '';
   filterType: 'ALL' | 'BUY' | 'SELL' = 'ALL';
+  filterStartDate: Date | null = null;
+  filterEndDate: Date | null = null;
+  pageSize = 20;
+  pageSizeOptions = [10, 20, 50, 100];
 
   constructor(private transactionService: TransactionService) {}
 
@@ -28,17 +32,46 @@ export class TransactionsComponent implements OnInit {
     return this.transactions.filter(t => {
       const symbolMatch = !this.filterSymbol || t.symbol.toUpperCase().includes(this.filterSymbol.toUpperCase());
       const typeMatch = this.filterType === 'ALL' || t.type === this.filterType;
-      return symbolMatch && typeMatch;
+
+      const txDate = new Date(t.timestamp);
+      const startMatch = !this.filterStartDate || txDate >= this.dayStart(this.filterStartDate);
+      const endMatch = !this.filterEndDate || txDate <= this.dayEnd(this.filterEndDate);
+
+      return symbolMatch && typeMatch && startMatch && endMatch;
     });
   }
+
+  onStartDateChange(date: Date | null): void {
+    this.filterStartDate = date;
+    if (!date) return;
+
+    const isToday = this.dayStart(date).getTime() === this.dayStart(new Date()).getTime();
+    if (isToday) {
+      this.filterEndDate = new Date();
+    } else if (this.filterEndDate && this.dayStart(this.filterEndDate) < this.dayStart(date)) {
+      this.filterEndDate = null;
+    }
+  }
+
+  disabledStartDate = (current: Date): boolean => {
+    return this.dayStart(current) > this.dayStart(new Date());
+  };
+
+  disabledEndDate = (current: Date): boolean => {
+    if (this.dayStart(current) > this.dayStart(new Date())) return true;
+    if (this.filterStartDate && this.dayStart(current) < this.dayStart(this.filterStartDate)) return true;
+    return false;
+  };
 
   clearFilters(): void {
     this.filterSymbol = '';
     this.filterType = 'ALL';
+    this.filterStartDate = null;
+    this.filterEndDate = null;
   }
 
   get hasActiveFilter(): boolean {
-    return !!this.filterSymbol || this.filterType !== 'ALL';
+    return !!this.filterSymbol || this.filterType !== 'ALL' || !!this.filterStartDate || !!this.filterEndDate;
   }
 
   formatCurrency(value: number): string {
@@ -50,5 +83,17 @@ export class TransactionsComponent implements OnInit {
       year: 'numeric', month: 'short', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
+  }
+
+  private dayStart(date: Date): Date {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  private dayEnd(date: Date): Date {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    return d;
   }
 }

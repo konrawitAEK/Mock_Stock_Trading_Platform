@@ -5,23 +5,46 @@
         <h2 class="page-title">Stock Market</h2>
         <p class="page-subtitle">{{ stocks.length }} stocks available</p>
       </div>
-      <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="simulating"
+        (click)="simulate()"
+      >
         <span nz-icon nzType="thunderbolt"></span>
         Simulate Market
       </button>
     </div>
 
-    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+    <nz-alert
+      *ngIf="error"
+      nzType="error"
+      [nzMessage]="error"
+      nzShowIcon
+      style="margin-bottom: 16px"
+    ></nz-alert>
 
     <nz-card class="search-card">
       <nz-input-group [nzPrefix]="searchIcon">
-        <input nz-input placeholder="Search by symbol or company..." [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+        <input
+          nz-input
+          placeholder="Search by symbol or company..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch()"
+        />
       </nz-input-group>
-      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+      <ng-template #searchIcon
+        ><span nz-icon nzType="search"></span
+      ></ng-template>
     </nz-card>
 
-    <nz-table #stockTable [nzData]="filteredStocks" [nzBordered]="false"
-      [nzShowPagination]="filteredStocks.length > 10" [nzPageSize]="20">
+    <nz-table
+      #stockTable
+      [nzData]="filteredStocks"
+      [nzBordered]="false"
+      [nzShowPagination]="filteredStocks.length > 10"
+      [nzPageSize]="20"
+    >
       <thead>
         <tr>
           <th>Symbol</th>
@@ -33,11 +56,17 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of stockTable.data" (click)="openDrawer(s.symbol)">
-          <td><span class="symbol-link">{{ s.symbol }}</span></td>
-          <td>{{ s.companyName }}</td>
-          <td><strong>{{ formatCurrency(s.currentPrice) }}</strong></td>
           <td>
-            <nz-tag [nzColor]="isPositive(s.changePercent) ? 'success' : 'error'">
+            <span class="symbol-link">{{ s.symbol }}</span>
+          </td>
+          <td>{{ s.companyName }}</td>
+          <td>
+            <strong>{{ formatCurrency(s.currentPrice) }}</strong>
+          </td>
+          <td>
+            <nz-tag
+              [nzColor]="isPositive(s.changePercent) ? 'success' : 'error'"
+            >
               {{ formatPercent(s.changePercent) }}
             </nz-tag>
           </td>
@@ -50,7 +79,5 @@
   </div>
 </nz-spin>
 
-<app-stock-detail-drawer
-  [(visible)]="drawerVisible"
-  [symbol]="selectedSymbol">
+<app-stock-detail-drawer [(visible)]="drawerVisible" [symbol]="selectedSymbol">
 </app-stock-detail-drawer>

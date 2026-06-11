@@ -2,40 +2,88 @@
   <div class="page-container">
     <h2 class="page-title-mb">Transaction History</h2>
 
-    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+    <nz-alert
+      *ngIf="error"
+      nzType="error"
+      [nzMessage]="error"
+      nzShowIcon
+      style="margin-bottom: 16px"
+    ></nz-alert>
 
     <nz-card class="filter-card">
       <div class="filter-bar">
         <div class="filter-item filter-item--grow">
           <label class="filter-label">Symbol</label>
           <nz-input-group [nzPrefix]="searchIcon" class="input-grow">
-            <input nz-input placeholder="e.g. AAPL" [(ngModel)]="filterSymbol" />
+            <input
+              nz-input
+              placeholder="e.g. AAPL"
+              [(ngModel)]="filterSymbol"
+            />
           </nz-input-group>
-          <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+          <ng-template #searchIcon
+            ><span nz-icon nzType="search"></span
+          ></ng-template>
         </div>
 
         <div class="filter-item">
           <label class="filter-label">Type</label>
-          <nz-select [(ngModel)]="filterType" style="width:130px;">
+          <nz-select [(ngModel)]="filterType" style="width: 130px">
             <nz-option nzValue="ALL" nzLabel="All Types"></nz-option>
             <nz-option nzValue="BUY" nzLabel="BUY"></nz-option>
             <nz-option nzValue="SELL" nzLabel="SELL"></nz-option>
           </nz-select>
         </div>
 
-        <button nz-button nzType="default" *ngIf="hasActiveFilter" (click)="clearFilters()">
+        <div class="filter-item">
+          <label class="filter-label">From</label>
+          <nz-date-picker
+            [(ngModel)]="filterStartDate"
+            [nzDisabledDate]="disabledStartDate"
+            (ngModelChange)="onStartDateChange($event)"
+            nzPlaceHolder="Start date"
+            style="width: 140px">
+          </nz-date-picker>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">To</label>
+          <nz-date-picker
+            [(ngModel)]="filterEndDate"
+            [nzDisabledDate]="disabledEndDate"
+            nzPlaceHolder="End date"
+            style="width: 140px">
+          </nz-date-picker>
+        </div>
+
+        <button
+          nz-button
+          nzType="default"
+          *ngIf="hasActiveFilter"
+          (click)="clearFilters()"
+        >
           <span nz-icon nzType="close-circle"></span> Clear
         </button>
 
         <span class="result-count" *ngIf="hasActiveFilter">
-          {{ filteredTransactions.length }} result{{ filteredTransactions.length !== 1 ? 's' : '' }}
+          {{ filteredTransactions.length }} result{{
+            filteredTransactions.length !== 1 ? "s" : ""
+          }}
         </span>
       </div>
     </nz-card>
 
     <nz-card>
-      <nz-table #txTable [nzData]="filteredTransactions" [nzBordered]="false"
-        [nzShowPagination]="filteredTransactions.length > 20" [nzPageSize]="20">
+      <nz-table
+        #txTable
+        [nzData]="filteredTransactions"
+        [nzBordered]="false"
+        [nzShowPagination]="true"
+        [nzPageSize]="pageSize"
+        [(nzPageSize)]="pageSize"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="pageSizeOptions"
+      >
         <thead>
           <tr>
             <th>Date / Time</th>
@@ -51,17 +99,27 @@
           <tr *ngFor="let t of txTable.data">
             <td class="date-cell">{{ formatDate(t.timestamp) }}</td>
             <td>
-              <nz-tag [nzColor]="t.type === 'BUY' ? 'success' : 'error'">{{ t.type }}</nz-tag>
+              <nz-tag [nzColor]="t.type === 'BUY' ? 'success' : 'error'">{{
+                t.type
+              }}</nz-tag>
             </td>
-            <td><strong>{{ t.symbol }}</strong></td>
+            <td>
+              <strong>{{ t.symbol }}</strong>
+            </td>
             <td>{{ t.companyName }}</td>
             <td>{{ t.quantity }}</td>
             <td>{{ formatCurrency(t.price) }}</td>
-            <td><strong>{{ formatCurrency(t.totalAmount) }}</strong></td>
+            <td>
+              <strong>{{ formatCurrency(t.totalAmount) }}</strong>
+            </td>
           </tr>
           <tr *ngIf="filteredTransactions.length === 0">
             <td colspan="7" class="empty-cell">
-              {{ hasActiveFilter ? 'No transactions match the filter.' : 'No transactions yet.' }}
+              {{
+                hasActiveFilter
+                  ? "No transactions match the filter."
+                  : "No transactions yet."
+              }}
             </td>
           </tr>
         </tbody>

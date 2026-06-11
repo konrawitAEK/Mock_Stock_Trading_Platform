@@ -6,13 +6,24 @@
         <h2 class="page-title">Dashboard</h2>
         <p class="page-subtitle">Overview of your portfolio performance</p>
       </div>
-      <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="simulating"
+        (click)="simulate()"
+      >
         <span nz-icon nzType="thunderbolt"></span>
         Simulate Market
       </button>
     </div>
 
-    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+    <nz-alert
+      *ngIf="error"
+      nzType="error"
+      [nzMessage]="error"
+      nzShowIcon
+      style="margin-bottom: 16px"
+    ></nz-alert>
 
     <ng-container *ngIf="portfolio">
       <!-- Stats -->
@@ -26,20 +37,34 @@
         <div nz-col [nzSpan]="6">
           <nz-card>
             <p class="stat-label">Stock Market Value</p>
-            <p class="stat-value">{{ formatCurrency(portfolio.stockMarketValue) }}</p>
+            <p class="stat-value">
+              {{ formatCurrency(portfolio.stockMarketValue) }}
+            </p>
           </nz-card>
         </div>
         <div nz-col [nzSpan]="6">
           <nz-card>
             <p class="stat-label">Total Portfolio Value</p>
-            <p class="stat-value stat-value--primary">{{ formatCurrency(portfolio.totalPortfolioValue) }}</p>
+            <p class="stat-value stat-value--primary">
+              {{ formatCurrency(portfolio.totalPortfolioValue) }}
+            </p>
           </nz-card>
         </div>
         <div nz-col [nzSpan]="6">
           <nz-card>
             <p class="stat-label">Total P / L</p>
-            <p class="stat-value" [ngClass]="isProfitable(portfolio.totalProfitLoss) ? 'text-success' : 'text-danger'">
-              {{ (isProfitable(portfolio.totalProfitLoss) ? '+' : '') + formatCurrency(portfolio.totalProfitLoss) }}
+            <p
+              class="stat-value"
+              [ngClass]="
+                isProfitable(portfolio.totalProfitLoss)
+                  ? 'text-success'
+                  : 'text-danger'
+              "
+            >
+              {{
+                (isProfitable(portfolio.totalProfitLoss) ? "+" : "") +
+                  formatCurrency(portfolio.totalProfitLoss)
+              }}
             </p>
           </nz-card>
         </div>
@@ -47,7 +72,12 @@
 
       <!-- Holdings -->
       <nz-card nzTitle="Holdings">
-        <nz-table #holdingsTable [nzData]="portfolio.holdings" [nzBordered]="false" [nzShowPagination]="false">
+        <nz-table
+          #holdingsTable
+          [nzData]="portfolio.holdings"
+          [nzBordered]="false"
+          [nzShowPagination]="false"
+        >
           <thead>
             <tr>
               <th>Symbol</th>
@@ -62,20 +92,42 @@
           </thead>
           <tbody>
             <tr *ngFor="let h of holdingsTable.data">
-              <td><strong>{{ h.symbol }}</strong></td>
+              <td>
+                <strong>{{ h.symbol }}</strong>
+              </td>
               <td>{{ h.companyName }}</td>
               <td>{{ h.quantity }}</td>
               <td>{{ formatCurrency(h.avgBuyPrice) }}</td>
               <td>{{ formatCurrency(h.currentPrice) }}</td>
-              <td><strong>{{ formatCurrency(h.marketValue) }}</strong></td>
-              <td [ngClass]="isProfitable(h.profitLoss) ? 'text-success' : 'text-danger'">
-                <strong>{{ (isProfitable(h.profitLoss) ? '+' : '') + formatCurrency(h.profitLoss) }}</strong>
+              <td>
+                <strong>{{ formatCurrency(h.marketValue) }}</strong>
+              </td>
+              <td
+                [ngClass]="
+                  isProfitable(h.profitLoss) ? 'text-success' : 'text-danger'
+                "
+              >
+                <strong>{{
+                  (isProfitable(h.profitLoss) ? "+" : "") +
+                    formatCurrency(h.profitLoss)
+                }}</strong>
               </td>
               <td>
-                <button nz-button nzType="primary" nzSize="small" (click)="openDrawer(h, 'BUY')" class="btn-buy">
+                <button
+                  nz-button
+                  nzType="primary"
+                  nzSize="small"
+                  (click)="openDrawer(h, 'BUY')"
+                  class="btn-buy"
+                >
                   <span nz-icon nzType="arrow-up"></span> Buy
                 </button>
-                <button nz-button nzDanger nzSize="small" (click)="openDrawer(h, 'SELL')">
+                <button
+                  nz-button
+                  nzDanger
+                  nzSize="small"
+                  (click)="openDrawer(h, 'SELL')"
+                >
                   <span nz-icon nzType="arrow-down"></span> Sell
                 </button>
               </td>
@@ -97,5 +149,6 @@
   [(visible)]="drawerVisible"
   [holding]="selectedHolding"
   [mode]="drawerMode"
-  (traded)="onTraded()">
+  (traded)="onTraded()"
+>
 </app-trading-drawer>
