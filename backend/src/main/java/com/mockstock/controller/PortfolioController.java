@@ -2,7 +2,7 @@ package com.mockstock.controller;
 
 import com.mockstock.dto.ApiResponse;
 import com.mockstock.dto.response.PortfolioResponse;
-import com.mockstock.service.TradingService;
+import com.mockstock.service.PortfolioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/portfolio")
 public class PortfolioController {
 
-    private final TradingService tradingService;
+    private final PortfolioService portfolioService;
 
-    public PortfolioController(TradingService tradingService) {
-        this.tradingService = tradingService;
+    public PortfolioController(PortfolioService portfolioService) {
+        this.portfolioService = portfolioService;
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PortfolioResponse>> getPortfolio() {
-        return ResponseEntity.ok(ApiResponse.ok(tradingService.buildPortfolioResponse()));
+        return ResponseEntity.ok(ApiResponse.ok(portfolioService.buildPortfolioResponse()));
     }
 }

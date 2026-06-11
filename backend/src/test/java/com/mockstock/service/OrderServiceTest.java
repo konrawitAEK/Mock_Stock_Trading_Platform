@@ -5,11 +5,9 @@ import com.mockstock.entity.PortfolioItem;
 import com.mockstock.entity.Stock;
 import com.mockstock.entity.Transaction;
 import com.mockstock.entity.TransactionType;
-import com.mockstock.entity.UserState;
 import com.mockstock.repository.PortfolioItemRepository;
 import com.mockstock.repository.StockRepository;
 import com.mockstock.repository.TransactionRepository;
-import com.mockstock.repository.UserStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,33 +27,26 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TradingServiceTest {
+class OrderServiceTest {
 
     @Mock StockRepository stockRepo;
     @Mock PortfolioItemRepository portfolioRepo;
     @Mock TransactionRepository txRepo;
-    @Mock UserStateRepository userStateRepo;
+    @Mock PortfolioService portfolioService;
 
-    @InjectMocks TradingService tradingService;
+    @InjectMocks OrderService orderService;
 
-    private final Stock aapl  = new Stock("AAPL",  "Apple Inc.",   BigDecimal.valueOf(182.50), "Tech",       "Apple");
-    private final Stock tsla  = new Stock("TSLA",  "Tesla Inc.",   BigDecimal.valueOf(238.00), "Automotive", "Tesla");
-    private final Stock nvda  = new Stock("NVDA",  "NVIDIA Corp.", BigDecimal.valueOf(495.00), "Semi",       "NVIDIA");
-    private UserState userState;
+    private final Stock aapl = new Stock("AAPL", "Apple Inc.",   BigDecimal.valueOf(182.50), "Tech",       "Apple");
+    private final Stock tsla = new Stock("TSLA", "Tesla Inc.",   BigDecimal.valueOf(238.00), "Automotive", "Tesla");
+    private final Stock nvda = new Stock("NVDA", "NVIDIA Corp.", BigDecimal.valueOf(495.00), "Semi",       "NVIDIA");
 
     @BeforeEach
     void setUp() {
-        userState = new UserState(1L, new BigDecimal("100000.00"));
-        lenient().when(userStateRepo.findById(1L)).thenReturn(Optional.of(userState));
-        lenient().when(userStateRepo.save(any())).thenAnswer(inv -> {
-            UserState s = inv.getArgument(0);
-            userState.setCash(s.getCash());
-            return s;
-        });
-        lenient().when(portfolioRepo.findAll()).thenReturn(List.of());
+        lenient().when(portfolioService.getCash()).thenReturn(new BigDecimal("100000.00"));
+        lenient().when(portfolioService.buildPortfolioResponse()).thenReturn(
+                new PortfolioResponse(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, List.of()));
         lenient().when(portfolioRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
         lenient().when(txRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        lenient().when(txRepo.findAllByOrderByTimestampDesc()).thenReturn(List.of());
     }
 
     // =========================================================================
@@ -70,10 +60,11 @@ class TradingServiceTest {
         when(portfolioRepo.findById("AAPL")).thenReturn(Optional.empty());
 
         double expectedCost = 182.50 * 10;
-        PortfolioResponse response = tradingService.buyStock("AAPL", 10);
+        orderService.buyStock("AAPL", 10);
 
-        assertEquals(100_000.0 - expectedCost, userState.getCash().doubleValue(), 0.001);
-        assertEquals(100_000.0 - expectedCost, response.getCash().doubleValue(), 0.001);
+        ArgumentCaptor<BigDecimal> cashCap = ArgumentCaptor.forClass(BigDecimal.class);
+        verify(portfolioService).setCash(cashCap.capture());
+        assertEquals(100_000.0 - expectedCost, cashCap.getValue().doubleValue(), 0.001);
 
         ArgumentCaptor<PortfolioItem> itemCap = ArgumentCaptor.forClass(PortfolioItem.class);
         verify(portfolioRepo).save(itemCap.capture());
@@ -92,11 +83,10 @@ class TradingServiceTest {
     void buyStock_avgPriceRecalculated() {
         PortfolioItem existing = new PortfolioItem("AAPL", 10, BigDecimal.valueOf(182.50));
         when(stockRepo.findById("AAPL")).thenReturn(Optional.of(aapl));
-        when(portfolioRepo.findById("AAPL"))
-                .thenReturn(Optional.of(existing));
+        when(portfolioRepo.findById("AAPL")).thenReturn(Optional.of(existing));
 
         aapl.setCurrentPrice(BigDecimal.valueOf(200.00));
-        tradingService.buyStock("AAPL", 5);
+        orderService.buyStock("AAPL", 5);
 
         ArgumentCaptor<PortfolioItem> cap = ArgumentCaptor.forClass(PortfolioItem.class);
         verify(portfolioRepo).save(cap.capture());
@@ -111,10 +101,10 @@ class TradingServiceTest {
         when(stockRepo.findById("NVDA")).thenReturn(Optional.of(nvda));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> tradingService.buyStock("NVDA", 300));
+                () -> orderService.buyStock("NVDA", 300));
 
         assertTrue(ex.getMessage().toLowerCase().contains("insufficient cash"));
-        assertEquals(100_000.0, userState.getCash().doubleValue(), 0.001);
+        verify(portfolioService, never()).setCash(any());
         verify(portfolioRepo, never()).save(any());
         verify(txRepo, never()).save(any());
     }
@@ -122,14 +112,14 @@ class TradingServiceTest {
     @Test
     @DisplayName("Buy fails: invalid quantity (zero)")
     void buyStock_invalidQuantityZero() {
-        assertThrows(IllegalArgumentException.class, () -> tradingService.buyStock("AAPL", 0));
+        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", 0));
         verify(stockRepo, never()).findById(anyString());
     }
 
     @Test
     @DisplayName("Buy fails: invalid quantity (negative)")
     void buyStock_invalidQuantityNegative() {
-        assertThrows(IllegalArgumentException.class, () -> tradingService.buyStock("AAPL", -5));
+        assertThrows(IllegalArgumentException.class, () -> orderService.buyStock("AAPL", -5));
         verify(stockRepo, never()).findById(anyString());
     }
 
@@ -139,7 +129,7 @@ class TradingServiceTest {
         when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> tradingService.buyStock("UNKNOWN", 10));
+                () -> orderService.buyStock("UNKNOWN", 10));
 
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }
@@ -156,9 +146,11 @@ class TradingServiceTest {
         when(portfolioRepo.findById("TSLA")).thenReturn(Optional.of(holding));
 
         double expectedTotal = 238.00 * 10;
-        tradingService.sellStock("TSLA", 10);
+        orderService.sellStock("TSLA", 10);
 
-        assertEquals(100_000.0 + expectedTotal, userState.getCash().doubleValue(), 0.001);
+        ArgumentCaptor<BigDecimal> cashCap = ArgumentCaptor.forClass(BigDecimal.class);
+        verify(portfolioService).setCash(cashCap.capture());
+        assertEquals(100_000.0 + expectedTotal, cashCap.getValue().doubleValue(), 0.001);
 
         ArgumentCaptor<PortfolioItem> cap = ArgumentCaptor.forClass(PortfolioItem.class);
         verify(portfolioRepo).save(cap.capture());
@@ -177,7 +169,7 @@ class TradingServiceTest {
         when(stockRepo.findById("TSLA")).thenReturn(Optional.of(tsla));
         when(portfolioRepo.findById("TSLA")).thenReturn(Optional.of(holding));
 
-        tradingService.sellStock("TSLA", 5);
+        orderService.sellStock("TSLA", 5);
 
         verify(portfolioRepo).deleteById("TSLA");
         verify(portfolioRepo, never()).save(any());
@@ -191,7 +183,7 @@ class TradingServiceTest {
         when(portfolioRepo.findById("AAPL")).thenReturn(Optional.of(holding));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> tradingService.sellStock("AAPL", 10));
+                () -> orderService.sellStock("AAPL", 10));
 
         assertTrue(ex.getMessage().toLowerCase().contains("insufficient shares"));
         verify(portfolioRepo, never()).save(any());
@@ -205,7 +197,7 @@ class TradingServiceTest {
         when(portfolioRepo.findById("AAPL")).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> tradingService.sellStock("AAPL", 5));
+                () -> orderService.sellStock("AAPL", 5));
 
         assertTrue(ex.getMessage().toLowerCase().contains("do not hold"));
     }
@@ -213,7 +205,7 @@ class TradingServiceTest {
     @Test
     @DisplayName("Sell fails: invalid quantity (zero)")
     void sellStock_invalidQuantityZero() {
-        assertThrows(IllegalArgumentException.class, () -> tradingService.sellStock("AAPL", 0));
+        assertThrows(IllegalArgumentException.class, () -> orderService.sellStock("AAPL", 0));
         verify(stockRepo, never()).findById(anyString());
     }
 
@@ -223,62 +215,8 @@ class TradingServiceTest {
         when(stockRepo.findById("UNKNOWN")).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> tradingService.sellStock("UNKNOWN", 5));
+                () -> orderService.sellStock("UNKNOWN", 5));
 
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
-    }
-
-    // =========================================================================
-    // SIMULATE MARKET TESTS
-    // =========================================================================
-
-    @Test
-    @DisplayName("Simulate market: prices change within ±5%")
-    void simulateMarket_pricesWithinBounds() {
-        Stock msft = new Stock("MSFT", "Microsoft", BigDecimal.valueOf(375.20), "Tech", "MS");
-        when(stockRepo.findAll()).thenReturn(List.of(aapl, tsla, msft));
-        when(stockRepo.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        List<Stock> result = tradingService.simulateMarket();
-
-        assertEquals(3, result.size());
-        for (Stock s : result) {
-            assertTrue(s.getChangePercent().abs().doubleValue() <= 5.01);
-            assertTrue(s.getCurrentPrice().doubleValue() >= 0.01);
-        }
-    }
-
-    @Test
-    @DisplayName("Simulate market: previousPrice and dailyChange updated correctly")
-    void simulateMarket_fieldsUpdated() {
-        BigDecimal originalPrice = aapl.getCurrentPrice();
-        when(stockRepo.findAll()).thenReturn(List.of(aapl));
-        when(stockRepo.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        tradingService.simulateMarket();
-
-        assertEquals(0, originalPrice.compareTo(aapl.getPreviousPrice()));
-        assertEquals(0, aapl.getCurrentPrice().subtract(originalPrice).compareTo(aapl.getDailyChange()));
-    }
-
-    // =========================================================================
-    // TRANSACTION TESTS
-    // =========================================================================
-
-    @Test
-    @DisplayName("Transactions: returned newest-first from repository")
-    void getTransactions_newestFirst() {
-        Transaction buy  = new Transaction("1", LocalDateTime.now().minusMinutes(2),
-                TransactionType.BUY,  "AAPL", "Apple", 5, BigDecimal.valueOf(182.50), BigDecimal.valueOf(912.50));
-        Transaction sell = new Transaction("2", LocalDateTime.now(),
-                TransactionType.SELL, "AAPL", "Apple", 5, BigDecimal.valueOf(190.00), BigDecimal.valueOf(950.00));
-
-        when(txRepo.findAllByOrderByTimestampDesc()).thenReturn(List.of(sell, buy));
-
-        List<Transaction> result = tradingService.getTransactions();
-
-        assertEquals(2, result.size());
-        assertEquals(TransactionType.SELL, result.get(0).getType());
-        assertEquals(TransactionType.BUY,  result.get(1).getType());
     }
 }
