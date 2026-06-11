@@ -36,27 +36,22 @@
 
 **เหตุผล:** ลำดับการ set ค่าสำคัญมาก — ต้องเก็บ `previousPrice` ก่อนเปลี่ยน `currentPrice` ไม่เช่นนั้น `dailyChange` จะเป็น 0 เสมอ
 
-### Prompt 4 — Angular Service Layer
-> "สร้าง Angular 18 standalone components แทน Next.js หน้า: Dashboard, Stock List (ค้นหา/เรียงลำดับ), Stock Detail (ฟอร์มซื้อ/ขาย), Transactions ใช้ ng-zorro-antd และ HttpClient ผ่าน ApiService lazy-load ทุก route"
-
-**เหตุผล:** Angular project setup มีหลายส่วนที่ต้องสัมพันธ์กัน (angular.json, tsconfig, app.config, routing) AI generate boilerplate ได้ถูกต้องตั้งแต่ pass แรก
-
-### Prompt 5 — Migrate ไป PostgreSQL
+### Prompt 4 — Migrate ไป PostgreSQL
 > "เพิ่ม PostgreSQL ใช้ Spring Data JPA + Flyway สร้าง TradingStore interface, JpaStore implementation, 4 repositories, Flyway V1 schema + V2 seed data, docker-compose พร้อม health check"
 
 **เหตุผล:** ต้องการให้ unit tests เดิมทำงานได้โดยไม่ต้องแก้ไข ใช้ strategy pattern ทำให้ `InMemoryStore` (สำหรับ test) และ `JpaStore` (production) แยกกันอย่างชัดเจน
 
-### Prompt 6 — Refactor ด้วย Pattern จาก POS project
+### Prompt 5 — Refactor ด้วย Pattern จาก POS project
 > "เพิ่ม Lombok ใน entity และ DTO, เพิ่ม Swagger/OpenAPI, แยก dto/request/ และ dto/response/ พร้อม static from() factory method, เปลี่ยน package model → entity"
 
 **เหตุผล:** ลด boilerplate ใน entity จาก ~70 บรรทัด (getter/setter ล้วน) เหลือ ~20 บรรทัด และทำให้ controller สะอาดขึ้นด้วย `StockDetailResponse.from(stock, holding)` แทนการประกอบ 12 บรรทัด
 
-### Prompt 7 — Service Layer Split
+### Prompt 6 — Service Layer Split
 > "แยก TradingService.java ที่มี business logic ทั้งหมดออกเป็น service แยกตาม domain: MarketService (simulate), OrderService (buy/sell), PortfolioService (portfolio summary + cash), StockService (query stocks), TransactionService (query history) พร้อมย้าย test ให้ตรงกับแต่ละ service"
 
 **เหตุผล:** `TradingService` มีหน้าที่หลายอย่างเกินไป (God Class) ทำให้ยากต่อการเพิ่ม feature และเขียน test แยกส่วน การแยกตาม Single Responsibility ทำให้แต่ละ service inject เฉพาะ dependencies ที่ต้องการจริงๆ
 
-### Prompt 8 — อธิบาย Exception Handling
+### Prompt 7 — อธิบาย Exception Handling
 > "GlobalExceptionHandler ไปเรียกใช้ตรงไหนและเรียกยังไง"
 
 **เหตุผล:** ทำความเข้าใจว่า `@ControllerAdvice` ทำงานอัตโนมัติโดย Spring — Service แค่ `throw` ออกมา ไม่ต้องเขียน `try-catch` ใน Controller เลย
