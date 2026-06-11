@@ -18,7 +18,6 @@ export class StockDetailDrawerComponent implements OnChanges {
   @Input() symbol: string | null = null;
 
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() traded = new EventEmitter<void>();
 
   stock: StockDetail | null = null;
   cash = 0;
@@ -132,8 +131,6 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.buying = false;
         this.buyForm.reset({ quantity: 1 });
         this.loadStock(payload.symbol);
-        this.refreshCash();
-        this.traded.emit();
         this.close();
       },
       error: err => { this.buyError = err.message; this.buying = false; },
@@ -154,23 +151,10 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.selling = false;
         this.sellForm.reset({ quantity: 1 });
         this.loadStock(payload.symbol);
-        this.refreshCash();
-        this.traded.emit();
         this.close();
       },
       error: err => { this.sellError = err.message; this.selling = false; },
     });
-  }
-
-  refreshCash(): void {
-    this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
-    if (this.symbol) {
-      this.limitsLoading = true;
-      this.orderService.getLimits(this.symbol).subscribe({
-        next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
-        error: () => { this.limitsLoading = false; },
-      });
-    }
   }
 
   close(): void {
