@@ -2,6 +2,7 @@ package com.mockstock.controller;
 
 import com.mockstock.dto.ApiResponse;
 import com.mockstock.dto.request.OrderRequest;
+import com.mockstock.dto.request.SymbolRequest;
 import com.mockstock.dto.response.PortfolioResponse;
 import com.mockstock.dto.response.TradeLimitsResponse;
 import com.mockstock.service.OrderService;
@@ -18,9 +19,9 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @GetMapping("/limits/{symbol}")
-    public ResponseEntity<ApiResponse<TradeLimitsResponse>> getTradeLimits(@PathVariable String symbol) {
-        TradeLimitsResponse limits = orderService.getTradeLimits(symbol.toUpperCase());
+    @PostMapping("/limits")
+    public ResponseEntity<ApiResponse<TradeLimitsResponse>> getTradeLimits(@RequestBody SymbolRequest request) {
+        TradeLimitsResponse limits = orderService.getTradeLimits(request.getSymbol().toUpperCase());
         return ResponseEntity.ok(ApiResponse.ok(limits, "OK"));
     }
 

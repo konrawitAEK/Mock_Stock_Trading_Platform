@@ -1,6 +1,7 @@
 package com.mockstock.controller;
 
 import com.mockstock.dto.ApiResponse;
+import com.mockstock.dto.request.SymbolRequest;
 import com.mockstock.dto.response.StockDetailResponse;
 import com.mockstock.entity.Stock;
 import com.mockstock.service.PortfolioService;
@@ -23,15 +24,16 @@ public class StockController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<Stock>>> getAllStocks() {
+    @PostMapping
+    public ResponseEntity<ApiResponse<List<Stock>>> getAllStocks(@RequestBody(required = false) Object body) {
         List<Stock> stocks = new ArrayList<>(stockService.getStocks().values());
         return ResponseEntity.ok(ApiResponse.ok(stocks));
     }
 
-    @GetMapping("/{symbol}")
+    @PostMapping("/detail")
     public ResponseEntity<ApiResponse<StockDetailResponse>> getStockDetail(
-            @PathVariable String symbol) {
+            @RequestBody SymbolRequest request) {
+        String symbol = request.getSymbol();
 
         Stock stock = stockService.getStock(symbol.toUpperCase());
         if (stock == null) {
