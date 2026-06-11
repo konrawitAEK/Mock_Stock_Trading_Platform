@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,18 +16,18 @@ import lombok.Setter;
 public class StockDetailResponse {
     private String symbol;
     private String companyName;
-    private double currentPrice;
-    private double previousPrice;
-    private double dailyChange;
-    private double changePercent;
+    private BigDecimal currentPrice;
+    private BigDecimal previousPrice;
+    private BigDecimal dailyChange;
+    private BigDecimal changePercent;
     private String sector;
     private String description;
     private int heldQuantity;
-    private double avgBuyPrice;
+    private BigDecimal avgBuyPrice;
 
     public static StockDetailResponse from(Stock stock, PortfolioItem holding) {
         int qty = holding != null ? holding.getQuantity() : 0;
-        double avgPrice = holding != null ? holding.getAvgBuyPrice() : 0.0;
+        BigDecimal avgPrice = holding != null ? holding.getAvgBuyPrice() : BigDecimal.ZERO;
         return new StockDetailResponse(
                 stock.getSymbol(),
                 stock.getCompanyName(),

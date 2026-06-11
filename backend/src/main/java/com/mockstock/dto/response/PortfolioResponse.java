@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -12,9 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PortfolioResponse {
-    private double cash;
-    private double stockMarketValue;
-    private double totalPortfolioValue;
-    private double totalProfitLoss;
+    private BigDecimal cash;
+    private BigDecimal stockMarketValue;
+    private BigDecimal totalPortfolioValue;
+    private BigDecimal totalProfitLoss;
     private List<HoldingItem> holdings;
 }

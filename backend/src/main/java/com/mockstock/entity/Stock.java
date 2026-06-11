@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "stocks")
 @Getter
@@ -23,16 +25,16 @@ public class Stock {
     private String companyName;
 
     @Column(name = "current_price", nullable = false)
-    private double currentPrice;
+    private BigDecimal currentPrice;
 
     @Column(name = "previous_price", nullable = false)
-    private double previousPrice;
+    private BigDecimal previousPrice;
 
     @Column(name = "daily_change", nullable = false)
-    private double dailyChange;
+    private BigDecimal dailyChange;
 
     @Column(name = "change_percent", nullable = false)
-    private double changePercent;
+    private BigDecimal changePercent;
 
     @Column(name = "sector", nullable = false, length = 100)
     private String sector;
@@ -40,14 +42,14 @@ public class Stock {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    public Stock(String symbol, String companyName, double currentPrice,
+    public Stock(String symbol, String companyName, BigDecimal currentPrice,
                  String sector, String description) {
         this.symbol = symbol;
         this.companyName = companyName;
         this.currentPrice = currentPrice;
         this.previousPrice = currentPrice;
-        this.dailyChange = 0.0;
-        this.changePercent = 0.0;
+        this.dailyChange = BigDecimal.ZERO;
+        this.changePercent = BigDecimal.ZERO;
         this.sector = sector;
         this.description = description;
     }

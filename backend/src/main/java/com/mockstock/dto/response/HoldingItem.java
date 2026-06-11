@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,14 +17,14 @@ public class HoldingItem {
     private String symbol;
     private String companyName;
     private int quantity;
-    private double avgBuyPrice;
-    private double currentPrice;
-    private double marketValue;
-    private double profitLoss;
+    private BigDecimal avgBuyPrice;
+    private BigDecimal currentPrice;
+    private BigDecimal marketValue;
+    private BigDecimal profitLoss;
 
     public static HoldingItem from(PortfolioItem item, Stock stock) {
-        double marketValue = stock.getCurrentPrice() * item.getQuantity();
-        double costBasis = item.getAvgBuyPrice() * item.getQuantity();
+        BigDecimal marketValue = stock.getCurrentPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+        BigDecimal costBasis = item.getAvgBuyPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
         return new HoldingItem(
                 item.getSymbol(),
                 stock.getCompanyName(),
@@ -30,7 +32,7 @@ public class HoldingItem {
                 item.getAvgBuyPrice(),
                 stock.getCurrentPrice(),
                 marketValue,
-                marketValue - costBasis
+                marketValue.subtract(costBasis)
         );
     }
 }

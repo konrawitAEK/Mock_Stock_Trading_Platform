@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -42,8 +43,8 @@ public class Transaction {
     private int quantity;
 
     @Column(name = "price", nullable = false)
-    private double price;
+    private BigDecimal price;
 
     @Column(name = "total_amount", nullable = false)
-    private double totalAmount;
+    private BigDecimal totalAmount;
 }

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "portfolio_items")
 @Getter
@@ -25,5 +27,5 @@ public class PortfolioItem {
     private int quantity;
 
     @Column(name = "avg_buy_price", nullable = false)
-    private double avgBuyPrice;
+    private BigDecimal avgBuyPrice;
 }

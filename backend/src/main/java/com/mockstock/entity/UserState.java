@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "user_state")
 @Getter
@@ -22,5 +24,5 @@ public class UserState {
     private long id;
 
     @Column(name = "cash", nullable = false)
-    private double cash;
+    private BigDecimal cash;
 }
