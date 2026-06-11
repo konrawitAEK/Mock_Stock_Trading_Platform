@@ -1,17 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { TransactionService } from '../../core/services/transaction.service';
 import { Transaction } from '../../core/models';
 
 @Component({
   selector: 'app-transactions',
-  standalone: true,
-  imports: [CommonModule, NzTableModule, NzTagModule, NzSpinModule, NzAlertModule, NzCardModule],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
 })

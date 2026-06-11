@@ -1,37 +1,12 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { NzTableModule } from "ng-zorro-antd/table";
-import { NzCardModule } from "ng-zorro-antd/card";
-import { NzButtonModule } from "ng-zorro-antd/button";
-import { NzSpinModule } from "ng-zorro-antd/spin";
-import { NzAlertModule } from "ng-zorro-antd/alert";
-import { NzTagModule } from "ng-zorro-antd/tag";
-import { NzIconModule } from "ng-zorro-antd/icon";
-import { NzGridModule } from "ng-zorro-antd/grid";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { PortfolioService } from "../../core/services/portfolio.service";
 import { MarketService } from "../../core/services/market.service";
 import { HoldingItem, PortfolioResponse } from "../../core/models";
-import {
-  TradingDrawerComponent,
-  TradeMode,
-} from "../../shared/trading-drawer/trading-drawer.component";
+import { TradeMode } from "../../shared/trading-drawer/trading-drawer.component";
 
 @Component({
   selector: "app-dashboard",
-  standalone: true,
-  imports: [
-    CommonModule,
-    NzTableModule,
-    NzCardModule,
-    NzButtonModule,
-    NzSpinModule,
-    NzAlertModule,
-    NzTagModule,
-    NzIconModule,
-    NzGridModule,
-    TradingDrawerComponent,
-  ],
   templateUrl: "./dashboard.component.html",
   styleUrl: "./dashboard.component.scss",
 })

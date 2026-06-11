@@ -1,26 +1,17 @@
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './shared/layout/layout.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { StockListComponent } from './pages/stock-list/stock-list.component';
+import { TransactionsComponent } from './pages/transactions/transactions.component';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./shared/layout/layout.component').then(m => m.LayoutComponent),
+    component: LayoutComponent,
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
-      },
-      {
-        path: 'stocks',
-        loadComponent: () =>
-          import('./pages/stock-list/stock-list.component').then(m => m.StockListComponent),
-      },
-      {
-        path: 'transactions',
-        loadComponent: () =>
-          import('./pages/transactions/transactions.component').then(m => m.TransactionsComponent),
-      },
+      { path: '', component: DashboardComponent },
+      { path: 'stocks', component: StockListComponent },
+      { path: 'transactions', component: TransactionsComponent },
       { path: '**', redirectTo: '' },
     ],
   },

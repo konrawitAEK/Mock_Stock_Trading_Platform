@@ -1,13 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NzDrawerModule } from 'ng-zorro-antd/drawer';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrderService } from '../../core/services/order.service';
 import { HoldingItem } from '../../core/models';
@@ -16,12 +8,6 @@ export type TradeMode = 'BUY' | 'SELL';
 
 @Component({
   selector: 'app-trading-drawer',
-  standalone: true,
-  imports: [
-    CommonModule, FormsModule, ReactiveFormsModule,
-    NzDrawerModule, NzButtonModule, NzInputNumberModule,
-    NzFormModule, NzDividerModule, NzAlertModule, NzIconModule,
-  ],
   templateUrl: './trading-drawer.component.html',
   styleUrl: './trading-drawer.component.scss',
 })

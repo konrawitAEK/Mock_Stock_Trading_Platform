@@ -1,36 +1,11 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { NzTableModule } from "ng-zorro-antd/table";
-import { NzInputModule } from "ng-zorro-antd/input";
-import { NzButtonModule } from "ng-zorro-antd/button";
-import { NzTagModule } from "ng-zorro-antd/tag";
-import { NzSpinModule } from "ng-zorro-antd/spin";
-import { NzAlertModule } from "ng-zorro-antd/alert";
-import { NzIconModule } from "ng-zorro-antd/icon";
-import { NzCardModule } from "ng-zorro-antd/card";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { StockService } from "../../core/services/stock.service";
 import { MarketService } from "../../core/services/market.service";
 import { Stock } from "../../core/models";
-import { StockDetailDrawerComponent } from "../../shared/stock-detail-drawer/stock-detail-drawer.component";
 
 @Component({
   selector: "app-stock-list",
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzTableModule,
-    NzInputModule,
-    NzButtonModule,
-    NzTagModule,
-    NzSpinModule,
-    NzAlertModule,
-    NzIconModule,
-    NzCardModule,
-    StockDetailDrawerComponent,
-  ],
   templateUrl: "./stock-list.component.html",
   styleUrl: "./stock-list.component.scss",
 })
