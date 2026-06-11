@@ -17,6 +17,8 @@ export class TradingDrawerComponent implements OnChanges {
   @Input() mode: TradeMode = 'BUY';
   @Input() cash = 0;
 
+  currentMode: TradeMode = 'BUY';
+
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() traded = new EventEmitter<void>();
 
@@ -41,6 +43,7 @@ export class TradingDrawerComponent implements OnChanges {
     const holdingChanged = changes['holding'] && this.visible;
 
     if (changes['visible']?.currentValue === true) {
+      this.currentMode = this.mode;
       this.tradeError = null;
       this.tradeForm.reset({ quantity: 1 });
     }
@@ -60,7 +63,7 @@ export class TradingDrawerComponent implements OnChanges {
   }
 
   setMode(mode: TradeMode): void {
-    this.mode = mode;
+    this.currentMode = mode;
     this.tradeError = null;
     this.tradeForm.reset({ quantity: 1 });
   }
@@ -77,13 +80,13 @@ export class TradingDrawerComponent implements OnChanges {
     this.tradeError = null;
     const qty = this.tradeForm.value.quantity as number;
     const symbol = this.holding.symbol;
-    const action$ = this.mode === 'BUY'
+    const action$ = this.currentMode === 'BUY'
       ? this.orderService.buy({ symbol, quantity: qty })
       : this.orderService.sell({ symbol, quantity: qty });
 
     action$.subscribe({
       next: () => {
-        const verb = this.mode === 'BUY' ? 'Bought' : 'Sold';
+        const verb = this.currentMode === 'BUY' ? 'Bought' : 'Sold';
         this.message.success(`${verb} ${qty} shares of ${symbol}`);
         this.trading = false;
         this.close();

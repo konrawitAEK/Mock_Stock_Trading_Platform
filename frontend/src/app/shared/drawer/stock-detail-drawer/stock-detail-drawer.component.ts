@@ -134,6 +134,7 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.loadStock(payload.symbol);
         this.refreshCash();
         this.traded.emit();
+        this.close();
       },
       error: err => { this.buyError = err.message; this.buying = false; },
     });
@@ -155,6 +156,7 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.loadStock(payload.symbol);
         this.refreshCash();
         this.traded.emit();
+        this.close();
       },
       error: err => { this.sellError = err.message; this.selling = false; },
     });

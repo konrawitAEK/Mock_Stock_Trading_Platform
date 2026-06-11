@@ -7,7 +7,7 @@
 
   <ng-template #drawerTitle>
     <span nz-icon
-          [style.color]="mode === 'BUY' ? '#1677ff' : '#ff4d4f'"
+          [style.color]="currentMode === 'BUY' ? '#1677ff' : '#ff4d4f'"
           style="margin-right:8px;"></span>
     Trade — {{ holding?.symbol }}
   </ng-template>
@@ -18,14 +18,14 @@
       <!-- Mode Toggle -->
       <div class="mode-toggle">
         <button nz-button
-                [nzType]="mode === 'BUY' ? 'primary' : 'default'"
-                [class.btn-buy]="mode === 'BUY'"
+                [nzType]="currentMode === 'BUY' ? 'primary' : 'default'"
+                [class.btn-buy]="currentMode === 'BUY'"
                 (click)="setMode('BUY')">
            Buy More
         </button>
         <button nz-button
-                [nzType]="mode === 'SELL' ? 'primary' : 'default'"
-                [nzDanger]="mode === 'SELL'"
+                [nzType]="currentMode === 'SELL' ? 'primary' : 'default'"
+                [nzDanger]="currentMode === 'SELL'"
                 (click)="setMode('SELL')">
            Sell
         </button>
@@ -61,11 +61,11 @@
         <form nz-form [formGroup]="tradeForm" nzLayout="vertical">
           <nz-form-item>
             <nz-form-label nzRequired>Quantity</nz-form-label>
-            <nz-form-control [nzErrorTip]="mode === 'SELL' ? 'Enter 1 – ' + (tradeLimits?.maxSellQty ?? 0) : 'Enter at least 1'">
+            <nz-form-control [nzErrorTip]="currentMode === 'SELL' ? 'Enter 1 – ' + (tradeLimits?.maxSellQty ?? 0) : 'Enter at least 1'">
               <nz-input-number
                 formControlName="quantity"
                 [nzMin]="1"
-                [nzMax]="mode === 'SELL' ? (tradeLimits?.maxSellQty ?? 0) : (tradeLimits?.maxBuyQty ?? 0)"
+                [nzMax]="currentMode === 'SELL' ? (tradeLimits?.maxSellQty ?? 0) : (tradeLimits?.maxBuyQty ?? 0)"
                 [nzStep]="1"
                 [nzPrecision]="0"
                 style="width:100%;">
@@ -76,7 +76,7 @@
 
         <!-- Total Cost / Proceeds -->
         <div class="estimate-box">
-          <div class="estimate-row" *ngIf="mode === 'BUY'">
+          <div class="estimate-row" *ngIf="currentMode === 'BUY'">
             <span class="muted-label">Available Balance</span>
             <span class="balance-amount" [class.balance-amount--low]="cash < tradeTotal">
               {{ formatCurrency(cash) }}
@@ -84,20 +84,20 @@
           </div>
           <div class="estimate-row">
             <span class="muted-label">
-              {{ mode === 'BUY' ? 'Estimated Cost' : 'Estimated Proceeds' }}
+              {{ currentMode === 'BUY' ? 'Estimated Cost' : 'Estimated Proceeds' }}
             </span>
             <strong class="estimate-amount"
-                    [ngClass]="mode === 'BUY' ? 'estimate-amount--buy' : 'estimate-amount--sell'">
+                    [ngClass]="currentMode === 'BUY' ? 'estimate-amount--buy' : 'estimate-amount--sell'">
               {{ formatCurrency(tradeTotal) }}
             </strong>
           </div>
-          <p *ngIf="mode === 'BUY'" class="hint-text">Max buyable: {{ tradeLimits?.maxBuyQty ?? 0 }} shares</p>
-          <p *ngIf="mode === 'SELL'" class="hint-text">
+          <p *ngIf="currentMode === 'BUY'" class="hint-text">Max buyable: {{ tradeLimits?.maxBuyQty ?? 0 }} shares</p>
+          <p *ngIf="currentMode === 'SELL'" class="hint-text">
             Max sellable: {{ tradeLimits?.maxSellQty ?? 0 }} shares
           </p>
         </div>
 
-        <nz-alert *ngIf="mode === 'BUY' && cash < tradeTotal && tradeForm.valid"
+        <nz-alert *ngIf="currentMode === 'BUY' && cash < tradeTotal && tradeForm.valid"
                   nzType="warning"
                   nzMessage="Insufficient balance"
                   nzShowIcon
@@ -108,14 +108,14 @@
         <!-- Submit -->
         <button nz-button
                 nzType="primary"
-                [nzDanger]="mode === 'SELL'"
-                [class.btn-buy]="mode === 'BUY'"
+                [nzDanger]="currentMode === 'SELL'"
+                [class.btn-buy]="currentMode === 'BUY'"
                 nzBlock
                 nzSize="large"
                 [nzLoading]="trading"
-                [disabled]="limitsLoading || tradeForm.invalid || (mode === 'BUY' && cash < tradeTotal)"
+                [disabled]="limitsLoading || tradeForm.invalid || (currentMode === 'BUY' && cash < tradeTotal)"
                 (click)="onTrade()">
-          {{ mode === 'BUY' ? 'Confirm Buy' : 'Confirm Sell' }}
+          {{ currentMode === 'BUY' ? 'Confirm Buy' : 'Confirm Sell' }}
         </button>
       </nz-spin>
 
