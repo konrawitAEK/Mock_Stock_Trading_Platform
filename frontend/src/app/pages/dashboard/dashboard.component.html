@@ -149,6 +149,7 @@
   [(visible)]="drawerVisible"
   [holding]="selectedHolding"
   [mode]="drawerMode"
+  [cash]="portfolio?.cash ?? 0"
   (traded)="onTraded()"
 >
 </app-trading-drawer>

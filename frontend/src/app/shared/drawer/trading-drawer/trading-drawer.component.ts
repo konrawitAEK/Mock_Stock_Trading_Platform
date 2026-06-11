@@ -15,6 +15,7 @@ export class TradingDrawerComponent implements OnChanges {
   @Input() visible = false;
   @Input() holding: HoldingItem | null = null;
   @Input() mode: TradeMode = 'BUY';
+  @Input() cash = 0;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() traded = new EventEmitter<void>();

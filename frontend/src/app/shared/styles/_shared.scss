@@ -91,6 +91,18 @@
   &--sell { color: #52c41a; }
 }
 
+.balance-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #08cc39;
+
+  &--low { color: #ff4d4f; }
+}
+
+.estimate-row + .estimate-row {
+  margin-top: 8px;
+}
+
 .hint-text {
   margin: 8px 0 0;
   font-size: 12px;

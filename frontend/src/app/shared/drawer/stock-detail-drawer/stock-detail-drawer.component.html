@@ -84,6 +84,12 @@
           </form>
           <div class="estimate-box">
             <div class="estimate-row">
+              <span class="muted-label">Available Balance</span>
+              <span class="balance-amount" [class.balance-amount--low]="cash < buyCost">
+                {{ formatCurrency(cash) }}
+              </span>
+            </div>
+            <div class="estimate-row">
               <span class="muted-label">Estimated Cost</span>
               <strong class="estimate-amount estimate-amount--buy">{{ formatCurrency(buyCost) }}</strong>
             </div>

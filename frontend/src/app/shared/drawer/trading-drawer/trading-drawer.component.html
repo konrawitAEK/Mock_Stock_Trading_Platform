@@ -75,6 +75,12 @@
 
       <!-- Total Cost / Proceeds -->
       <div class="estimate-box">
+        <div class="estimate-row" *ngIf="mode === 'BUY'">
+          <span class="muted-label">Available Balance</span>
+          <span class="balance-amount" [class.balance-amount--low]="cash < tradeTotal">
+            {{ formatCurrency(cash) }}
+          </span>
+        </div>
         <div class="estimate-row">
           <span class="muted-label">
             {{ mode === 'BUY' ? 'Estimated Cost' : 'Estimated Proceeds' }}

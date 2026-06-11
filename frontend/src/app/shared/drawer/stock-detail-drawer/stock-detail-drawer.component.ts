@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { StockService } from '../../../core/services/stock.service';
 import { OrderService } from '../../../core/services/order.service';
+import { PortfolioService } from '../../../core/services/portfolio.service';
 import { StockDetail } from '../../../core/models';
 
 type TradeMode = 'BUY' | 'SELL';
@@ -20,6 +21,7 @@ export class StockDetailDrawerComponent implements OnChanges {
   @Output() traded = new EventEmitter<void>();
 
   stock: StockDetail | null = null;
+  cash = 0;
   loading = false;
   error: string | null = null;
   notFound = false;
@@ -35,6 +37,7 @@ export class StockDetailDrawerComponent implements OnChanges {
   constructor(
     private stockService: StockService,
     private orderService: OrderService,
+    private portfolioService: PortfolioService,
     private message: NzMessageService,
     private fb: FormBuilder,
   ) {
@@ -52,6 +55,10 @@ export class StockDetailDrawerComponent implements OnChanges {
 
     if ((becameVisible || symbolChanged) && this.symbol) {
       this.loadStock(this.symbol);
+    }
+
+    if (becameVisible) {
+      this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
     }
 
     if (changes['visible']?.currentValue === false) {
@@ -111,6 +118,7 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.buying = false;
         this.buyForm.reset({ quantity: 1 });
         this.loadStock(symbol);
+        this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
         this.traded.emit();
       },
       error: err => { this.buyError = err.message; this.buying = false; },
