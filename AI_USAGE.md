@@ -13,7 +13,9 @@
 - **Migrate ไป PostgreSQL** — ออกแบบ `TradingStore` interface, `JpaStore` implementation, Flyway migrations, docker-compose
 - **Refactor** — เพิ่ม Lombok, Swagger/OpenAPI, แยก DTO เป็น request/response, เปลี่ยน package `model` → `entity`
 - **แก้ปัญหา Docker** — เปลี่ยน base image จาก `-alpine` เป็น `-jammy` รองรับ ARM64, เพิ่ม `.npmrc` สำหรับ peer deps
-- **เขียนเอกสาร** — README.md (ภาษาไทย) และไฟล์นี้
+- **Service Layer Split** — แยก `TradingService` ขนาดใหญ่ออกเป็น 5 services อิสระ (MarketService, OrderService, PortfolioService, StockService, TransactionService) พร้อม tests แยกต่างหาก
+- **Exception Handling** — อธิบาย flow ของ `GlobalExceptionHandler` + `@ControllerAdvice` และความสัมพันธ์กับ Service layer
+- **เขียนเอกสาร** — README.md (ภาษาไทย) พร้อม Architecture Overview, Business Logic, ตัวอย่าง API และไฟล์นี้
 
 ---
 
@@ -49,6 +51,16 @@
 
 **เหตุผล:** ลด boilerplate ใน entity จาก ~70 บรรทัด (getter/setter ล้วน) เหลือ ~20 บรรทัด และทำให้ controller สะอาดขึ้นด้วย `StockDetailResponse.from(stock, holding)` แทนการประกอบ 12 บรรทัด
 
+### Prompt 7 — Service Layer Split
+> "แยก TradingService.java ที่มี business logic ทั้งหมดออกเป็น service แยกตาม domain: MarketService (simulate), OrderService (buy/sell), PortfolioService (portfolio summary + cash), StockService (query stocks), TransactionService (query history) พร้อมย้าย test ให้ตรงกับแต่ละ service"
+
+**เหตุผล:** `TradingService` มีหน้าที่หลายอย่างเกินไป (God Class) ทำให้ยากต่อการเพิ่ม feature และเขียน test แยกส่วน การแยกตาม Single Responsibility ทำให้แต่ละ service inject เฉพาะ dependencies ที่ต้องการจริงๆ
+
+### Prompt 8 — อธิบาย Exception Handling
+> "GlobalExceptionHandler ไปเรียกใช้ตรงไหนและเรียกยังไง"
+
+**เหตุผล:** ทำความเข้าใจว่า `@ControllerAdvice` ทำงานอัตโนมัติโดย Spring — Service แค่ `throw` ออกมา ไม่ต้องเขียน `try-catch` ใน Controller เลย
+
 ---
 
 ## 3. สิ่งที่แก้ไขหลัง AI Generate
@@ -70,6 +82,8 @@
 8. **`UserState.id` type mismatch** — AI ใช้ Java `long` แต่ SQL schema ใช้ `INT` Hibernate 6 validate strict กว่า → ต้องเปลี่ยน SQL เป็น `BIGINT` และเพิ่ม V3 migration สำหรับ volume เก่า
 
 9. **`StockController` inject ผิด bean** — หลัง refactor `InMemoryStore` ไม่มี `@Component` แต่ `StockController` ยังใช้ `InMemoryStore` โดยตรง แก้ให้ inject `TradingService` แทน
+
+10. **Service Split — dependency direction** — ตอนแยก `TradingService` ออกเป็น 5 services AI draft ให้ `OrderService` คำนวณ portfolio response เองซ้ำ แก้โดยให้ `OrderService` inject `PortfolioService` และ delegate การคำนวณไปที่ `PortfolioService.buildPortfolioResponse()` แทน
 
 ---
 
@@ -120,3 +134,5 @@ assertTrue(Math.abs(stock.getChangePercent()) <= 5.01);
 5. **Frontend unit tests** — เขียน Jasmine/Karma tests สำหรับ Angular services และ component tests
 
 6. **E2E tests** — เพิ่ม Cypress tests ครอบคลุม flow ซื้อ → portfolio update → transaction history → simulate market
+
+7. **`ResourceNotFoundException`** — เพิ่ม custom exception สำหรับ 404 (stock not found, holding not found) แทนการคืน `null` หรือใช้ `IllegalArgumentException` ซึ่ง semantic ไม่ตรงกับ HTTP 404
