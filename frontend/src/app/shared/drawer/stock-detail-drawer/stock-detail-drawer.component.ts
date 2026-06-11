@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { StockService } from '../../core/services/stock.service';
-import { OrderService } from '../../core/services/order.service';
-import { StockDetail } from '../../core/models';
+import { StockService } from '../../../core/services/stock.service';
+import { OrderService } from '../../../core/services/order.service';
+import { StockDetail } from '../../../core/models';
 
 type TradeMode = 'BUY' | 'SELL';
 

@@ -3,7 +3,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { PortfolioService } from "../../core/services/portfolio.service";
 import { MarketService } from "../../core/services/market.service";
 import { HoldingItem, PortfolioResponse } from "../../core/models";
-import { TradeMode } from "../../shared/trading-drawer/trading-drawer.component";
+import { TradeMode } from "../../shared/drawer/trading-drawer/trading-drawer.component";
 
 @Component({
   selector: "app-dashboard",

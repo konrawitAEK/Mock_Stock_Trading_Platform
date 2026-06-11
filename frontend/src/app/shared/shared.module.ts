@@ -20,8 +20,8 @@ import { NzInputModule } from "ng-zorro-antd/input";
 import { NzGridModule } from "ng-zorro-antd/grid";
 
 import { LayoutComponent } from "./layout/layout.component";
-import { TradingDrawerComponent } from "./trading-drawer/trading-drawer.component";
-import { StockDetailDrawerComponent } from "./stock-detail-drawer/stock-detail-drawer.component";
+import { TradingDrawerComponent } from "./drawer/trading-drawer/trading-drawer.component";
+import { StockDetailDrawerComponent } from "./drawer/stock-detail-drawer/stock-detail-drawer.component";
 
 const NZ_MODULES = [
   NzLayoutModule,

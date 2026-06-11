@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { OrderService } from '../../core/services/order.service';
-import { HoldingItem } from '../../core/models';
+import { OrderService } from '../../../core/services/order.service';
+import { HoldingItem } from '../../../core/models';
 
 export type TradeMode = 'BUY' | 'SELL';
 
