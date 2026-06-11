@@ -1,0 +1,42 @@
+<nz-spin [nzSpinning]="loading">
+  <div class="page-container">
+    <h2 style="margin:0 0 24px;font-size:22px;font-weight:700;">Transaction History</h2>
+
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+
+    <nz-card>
+      <nz-table #txTable [nzData]="transactions" [nzBordered]="false"
+        [nzShowPagination]="transactions.length > 20" [nzPageSize]="20">
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Type</th>
+            <th>Symbol</th>
+            <th>Company</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of txTable.data">
+            <td style="white-space:nowrap;font-size:13px;">{{ formatDate(t.timestamp) }}</td>
+            <td>
+              <nz-tag [nzColor]="t.type === 'BUY' ? 'success' : 'error'">{{ t.type }}</nz-tag>
+            </td>
+            <td><strong>{{ t.symbol }}</strong></td>
+            <td>{{ t.companyName }}</td>
+            <td>{{ t.quantity }}</td>
+            <td>{{ formatCurrency(t.price) }}</td>
+            <td><strong>{{ formatCurrency(t.totalAmount) }}</strong></td>
+          </tr>
+          <tr *ngIf="transactions.length === 0">
+            <td colspan="7" style="text-align:center;color:#bfbfbf;padding:40px;">
+              No transactions yet.
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </div>
+</nz-spin>

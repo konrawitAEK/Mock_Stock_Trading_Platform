@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mock-stock-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: mockstock
+      POSTGRES_USER: mockstock
+      POSTGRES_PASSWORD: mockstock
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mockstock -d mockstock"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mock-stock-backend
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_URL=jdbc:postgresql://postgres:5432/mockstock
+      - DB_USER=mockstock
+      - DB_PASSWORD=mockstock
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mock-stock-frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

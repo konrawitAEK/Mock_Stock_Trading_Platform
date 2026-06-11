@@ -1,0 +1,85 @@
+<nz-spin [nzSpinning]="loading">
+  <div class="page-container">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <div>
+        <h2 style="margin:0;font-size:22px;font-weight:700;">Dashboard</h2>
+        <p style="margin:0;color:#8c8c8c;font-size:13px;">Overview of your portfolio performance</p>
+      </div>
+      <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
+        <span nz-icon nzType="thunderbolt"></span>
+        Simulate Market
+      </button>
+    </div>
+
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+
+    <ng-container *ngIf="portfolio">
+      <!-- Stats -->
+      <div nz-row [nzGutter]="16" style="margin-bottom:24px;">
+        <div nz-col [nzSpan]="6">
+          <nz-card>
+            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Cash Balance</p>
+            <p style="font-size:22px;font-weight:700;margin:0;">{{ formatCurrency(portfolio.cash) }}</p>
+          </nz-card>
+        </div>
+        <div nz-col [nzSpan]="6">
+          <nz-card>
+            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Stock Market Value</p>
+            <p style="font-size:22px;font-weight:700;margin:0;">{{ formatCurrency(portfolio.stockMarketValue) }}</p>
+          </nz-card>
+        </div>
+        <div nz-col [nzSpan]="6">
+          <nz-card>
+            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Total Portfolio Value</p>
+            <p style="font-size:22px;font-weight:700;margin:0;color:#1677ff;">{{ formatCurrency(portfolio.totalPortfolioValue) }}</p>
+          </nz-card>
+        </div>
+        <div nz-col [nzSpan]="6">
+          <nz-card>
+            <p style="color:#8c8c8c;font-size:13px;margin-bottom:4px;">Total P / L</p>
+            <p style="font-size:22px;font-weight:700;margin:0;"
+               [style.color]="isProfitable(portfolio.totalProfitLoss) ? '#52c41a' : '#ff4d4f'">
+              {{ (isProfitable(portfolio.totalProfitLoss) ? '+' : '') + formatCurrency(portfolio.totalProfitLoss) }}
+            </p>
+          </nz-card>
+        </div>
+      </div>
+
+      <!-- Holdings -->
+      <nz-card nzTitle="Holdings">
+        <nz-table #holdingsTable [nzData]="portfolio.holdings" [nzBordered]="false" [nzShowPagination]="false">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Company</th>
+              <th>Qty</th>
+              <th>Avg Buy Price</th>
+              <th>Current Price</th>
+              <th>Market Value</th>
+              <th>P / L</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of holdingsTable.data">
+              <td><strong>{{ h.symbol }}</strong></td>
+              <td>{{ h.companyName }}</td>
+              <td>{{ h.quantity }}</td>
+              <td>{{ formatCurrency(h.avgBuyPrice) }}</td>
+              <td>{{ formatCurrency(h.currentPrice) }}</td>
+              <td><strong>{{ formatCurrency(h.marketValue) }}</strong></td>
+              <td [style.color]="isProfitable(h.profitLoss) ? '#52c41a' : '#ff4d4f'">
+                <strong>{{ (isProfitable(h.profitLoss) ? '+' : '') + formatCurrency(h.profitLoss) }}</strong>
+              </td>
+            </tr>
+            <tr *ngIf="portfolio.holdings.length === 0">
+              <td colspan="7" style="text-align:center;color:#bfbfbf;padding:40px;">
+                No holdings — buy some stocks to get started.
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </ng-container>
+  </div>
+</nz-spin>

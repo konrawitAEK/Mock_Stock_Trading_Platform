@@ -1,0 +1,55 @@
+<nz-spin [nzSpinning]="loading">
+  <div class="page-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <div>
+        <h2 style="margin:0;font-size:22px;font-weight:700;">Stock Market</h2>
+        <p style="margin:0;color:#8c8c8c;font-size:13px;">{{ stocks.length }} stocks available</p>
+      </div>
+      <button nz-button nzType="primary" [nzLoading]="simulating" (click)="simulate()">
+        <span nz-icon nzType="thunderbolt"></span>
+        Simulate Market
+      </button>
+    </div>
+
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+
+    <nz-card style="margin-bottom:16px;">
+      <nz-input-group [nzPrefix]="searchIcon">
+        <input nz-input placeholder="Search by symbol or company..." [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+      </nz-input-group>
+      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+    </nz-card>
+
+    <nz-table #stockTable [nzData]="filteredStocks" [nzBordered]="false"
+      [nzShowPagination]="filteredStocks.length > 10" [nzPageSize]="20">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Company</th>
+          <th>Price</th>
+          <th>Change %</th>
+          <th>Sector</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of stockTable.data">
+          <td>
+            <a [routerLink]="['/stocks', s.symbol]" style="font-weight:700;">{{ s.symbol }}</a>
+          </td>
+          <td>
+            <a [routerLink]="['/stocks', s.symbol]">{{ s.companyName }}</a>
+          </td>
+          <td><strong>{{ formatCurrency(s.currentPrice) }}</strong></td>
+          <td>
+            <nz-tag [nzColor]="isPositive(s.changePercent) ? 'success' : 'error'">
+              {{ formatPercent(s.changePercent) }}
+            </nz-tag>
+          </td>
+          <td>
+            <nz-tag>{{ s.sector }}</nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</nz-spin>

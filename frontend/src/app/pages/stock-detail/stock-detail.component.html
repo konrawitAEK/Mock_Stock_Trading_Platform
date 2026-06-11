@@ -1,0 +1,94 @@
+<nz-spin [nzSpinning]="loading">
+  <div class="page-container">
+    <a routerLink="/stocks" style="color:#1677ff;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px;">
+      ← Back to Stocks
+    </a>
+
+    <div *ngIf="notFound" style="text-align:center;padding:60px;">
+      <h3>Stock not found</h3>
+      <a routerLink="/stocks">Go back to stock list</a>
+    </div>
+
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+
+    <ng-container *ngIf="stock && !notFound">
+      <!-- Stock info card -->
+      <nz-card style="margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+              <h2 style="margin:0;font-size:28px;font-weight:800;">{{ stock.symbol }}</h2>
+              <nz-tag>{{ stock.sector }}</nz-tag>
+            </div>
+            <p style="margin:0;font-size:16px;color:#595959;">{{ stock.companyName }}</p>
+            <p style="margin:8px 0 0;color:#8c8c8c;font-size:13px;">{{ stock.description }}</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:32px;font-weight:800;">{{ formatCurrency(stock.currentPrice) }}</div>
+            <nz-tag [nzColor]="isPositive(stock.changePercent) ? 'success' : 'error'" style="margin-top:4px;">
+              {{ formatPercent(stock.changePercent) }}
+              ({{ isPositive(stock.dailyChange) ? '+' : '' }}{{ formatCurrency(stock.dailyChange) }})
+            </nz-tag>
+          </div>
+        </div>
+      </nz-card>
+
+      <!-- Holding + Trade -->
+      <div nz-row [nzGutter]="24">
+        <!-- Your position -->
+        <div nz-col [nzSpan]="8">
+          <nz-card nzTitle="Your Position">
+            <nz-descriptions [nzColumn]="1" [nzBordered]="false">
+              <nz-descriptions-item nzTitle="Shares Held">{{ stock.heldQuantity }}</nz-descriptions-item>
+              <nz-descriptions-item nzTitle="Avg Buy Price">
+                {{ stock.heldQuantity > 0 ? formatCurrency(stock.avgBuyPrice) : '—' }}
+              </nz-descriptions-item>
+              <nz-descriptions-item nzTitle="Current Value">
+                {{ stock.heldQuantity > 0 ? formatCurrency(stock.heldQuantity * stock.currentPrice) : '—' }}
+              </nz-descriptions-item>
+            </nz-descriptions>
+          </nz-card>
+        </div>
+
+        <!-- Buy -->
+        <div nz-col [nzSpan]="8">
+          <nz-card nzTitle="Buy {{ stock.symbol }}">
+            <nz-alert *ngIf="buyError" nzType="error" [nzMessage]="buyError" nzShowIcon style="margin-bottom:12px;"></nz-alert>
+            <form nz-form [formGroup]="buyForm" (ngSubmit)="onBuy()">
+              <nz-form-item>
+                <nz-form-label>Quantity</nz-form-label>
+                <nz-form-control nzErrorTip="Enter a positive integer">
+                  <nz-input-number formControlName="quantity" [nzMin]="1" [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+              <p style="color:#8c8c8c;font-size:13px;margin-bottom:12px;">
+                Cost: <strong>{{ formatCurrency(buyCost) }}</strong>
+              </p>
+              <button nz-button nzType="primary" nzBlock [nzLoading]="buying" [disabled]="buyForm.invalid">Buy</button>
+            </form>
+          </nz-card>
+        </div>
+
+        <!-- Sell -->
+        <div nz-col [nzSpan]="8">
+          <nz-card nzTitle="Sell {{ stock.symbol }}">
+            <nz-alert *ngIf="sellError" nzType="error" [nzMessage]="sellError" nzShowIcon style="margin-bottom:12px;"></nz-alert>
+            <form nz-form [formGroup]="sellForm" (ngSubmit)="onSell()">
+              <nz-form-item>
+                <nz-form-label>Quantity</nz-form-label>
+                <nz-form-control nzErrorTip="Enter a positive integer">
+                  <nz-input-number formControlName="quantity" [nzMin]="1" [nzStep]="1" [nzPrecision]="0" style="width:100%;"></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+              <p style="color:#8c8c8c;font-size:13px;margin-bottom:12px;">
+                Proceeds: <strong>{{ formatCurrency(sellProceeds) }}</strong>
+              </p>
+              <button nz-button nzType="default" nzDanger nzBlock [nzLoading]="selling"
+                [disabled]="sellForm.invalid || stock.heldQuantity === 0">Sell</button>
+            </form>
+          </nz-card>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</nz-spin>
