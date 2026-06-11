@@ -93,9 +93,16 @@
               <span class="muted-label">Estimated Cost</span>
               <strong class="estimate-amount estimate-amount--buy">{{ formatCurrency(buyCost) }}</strong>
             </div>
+            <p class="hint-text">Max buyable: {{ maxBuyQty }} shares</p>
           </div>
+          <nz-alert *ngIf="cash < buyCost && buyForm.valid"
+                    nzType="warning"
+                    nzMessage="Insufficient balance"
+                    nzShowIcon
+                    style="margin-bottom:12px;">
+          </nz-alert>
           <button nz-button nzType="primary" nzBlock nzSize="large" class="btn-buy"
-                  [nzLoading]="buying" [disabled]="buyForm.invalid" (click)="onBuy()">
+                  [nzLoading]="buying" [disabled]="buyForm.invalid || cash < buyCost" (click)="onBuy()">
             Confirm Buy
           </button>
         </ng-container>

@@ -90,11 +90,18 @@
             {{ formatCurrency(tradeTotal) }}
           </strong>
         </div>
+        <p *ngIf="mode === 'BUY'" class="hint-text">Max buyable: {{ maxBuyQty }} shares</p>
         <p *ngIf="mode === 'SELL'" class="hint-text">
           Max sellable: {{ maxSellQty }} shares
         </p>
       </div>
 
+      <nz-alert *ngIf="mode === 'BUY' && cash < tradeTotal && tradeForm.valid"
+                nzType="warning"
+                nzMessage="Insufficient balance"
+                nzShowIcon
+                style="margin-bottom:12px;">
+      </nz-alert>
       <nz-alert *ngIf="tradeError" nzType="error" [nzMessage]="tradeError" nzShowIcon style="margin-bottom:16px;"></nz-alert>
 
       <!-- Submit -->
@@ -105,7 +112,7 @@
               nzBlock
               nzSize="large"
               [nzLoading]="trading"
-              [disabled]="tradeForm.invalid"
+              [disabled]="tradeForm.invalid || (mode === 'BUY' && cash < tradeTotal)"
               (click)="onTrade()">
         {{ mode === 'BUY' ? 'Confirm Buy' : 'Confirm Sell' }}
       </button>

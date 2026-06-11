@@ -101,6 +101,11 @@ export class StockDetailDrawerComponent implements OnChanges {
     return this.stock ? (qty || 0) * this.stock.currentPrice : 0;
   }
 
+  get maxBuyQty(): number {
+    if (!this.stock || this.stock.currentPrice === 0) return 0;
+    return Math.floor(this.cash / this.stock.currentPrice);
+  }
+
   get sellProceeds(): number {
     const qty = this.sellForm.get('quantity')?.value as number;
     return this.stock ? (qty || 0) * this.stock.currentPrice : 0;
@@ -118,7 +123,7 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.buying = false;
         this.buyForm.reset({ quantity: 1 });
         this.loadStock(symbol);
-        this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
+        this.refreshCash();
         this.traded.emit();
       },
       error: err => { this.buyError = err.message; this.buying = false; },
@@ -137,10 +142,15 @@ export class StockDetailDrawerComponent implements OnChanges {
         this.selling = false;
         this.sellForm.reset({ quantity: 1 });
         this.loadStock(symbol);
+        this.refreshCash();
         this.traded.emit();
       },
       error: err => { this.sellError = err.message; this.selling = false; },
     });
+  }
+
+  refreshCash(): void {
+    this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
   }
 
   close(): void {

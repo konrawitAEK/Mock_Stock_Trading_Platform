@@ -57,6 +57,11 @@ export class TradingDrawerComponent implements OnChanges {
     return this.holding?.quantity ?? 0;
   }
 
+  get maxBuyQty(): number {
+    if (!this.holding || this.holding.currentPrice === 0) return 0;
+    return Math.floor(this.cash / this.holding.currentPrice);
+  }
+
   onTrade(): void {
     if (this.tradeForm.invalid || !this.holding) return;
     this.trading = true;
