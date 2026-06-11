@@ -4,9 +4,38 @@
 
     <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon style="margin-bottom:16px;"></nz-alert>
 
+    <nz-card class="filter-card">
+      <div class="filter-bar">
+        <div class="filter-item filter-item--grow">
+          <label class="filter-label">Symbol</label>
+          <nz-input-group [nzPrefix]="searchIcon" class="input-grow">
+            <input nz-input placeholder="e.g. AAPL" [(ngModel)]="filterSymbol" />
+          </nz-input-group>
+          <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">Type</label>
+          <nz-select [(ngModel)]="filterType" style="width:130px;">
+            <nz-option nzValue="ALL" nzLabel="All Types"></nz-option>
+            <nz-option nzValue="BUY" nzLabel="BUY"></nz-option>
+            <nz-option nzValue="SELL" nzLabel="SELL"></nz-option>
+          </nz-select>
+        </div>
+
+        <button nz-button nzType="default" *ngIf="hasActiveFilter" (click)="clearFilters()">
+          <span nz-icon nzType="close-circle"></span> Clear
+        </button>
+
+        <span class="result-count" *ngIf="hasActiveFilter">
+          {{ filteredTransactions.length }} result{{ filteredTransactions.length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </nz-card>
+
     <nz-card>
-      <nz-table #txTable [nzData]="transactions" [nzBordered]="false"
-        [nzShowPagination]="transactions.length > 20" [nzPageSize]="20">
+      <nz-table #txTable [nzData]="filteredTransactions" [nzBordered]="false"
+        [nzShowPagination]="filteredTransactions.length > 20" [nzPageSize]="20">
         <thead>
           <tr>
             <th>Date / Time</th>
@@ -30,9 +59,9 @@
             <td>{{ formatCurrency(t.price) }}</td>
             <td><strong>{{ formatCurrency(t.totalAmount) }}</strong></td>
           </tr>
-          <tr *ngIf="transactions.length === 0">
+          <tr *ngIf="filteredTransactions.length === 0">
             <td colspan="7" class="empty-cell">
-              No transactions yet.
+              {{ hasActiveFilter ? 'No transactions match the filter.' : 'No transactions yet.' }}
             </td>
           </tr>
         </tbody>

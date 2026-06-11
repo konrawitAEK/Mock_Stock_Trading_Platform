@@ -18,6 +18,7 @@ import { NzTableModule } from "ng-zorro-antd/table";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzInputModule } from "ng-zorro-antd/input";
 import { NzGridModule } from "ng-zorro-antd/grid";
+import { NzSelectModule } from "ng-zorro-antd/select";
 
 import { LayoutComponent } from "./layout/layout.component";
 import { TradingDrawerComponent } from "./drawer/trading-drawer/trading-drawer.component";
@@ -39,6 +40,7 @@ const NZ_MODULES = [
   NzCardModule,
   NzInputModule,
   NzGridModule,
+  NzSelectModule,
 ];
 
 @NgModule({

@@ -10,3 +10,45 @@
   white-space: nowrap;
   font-size: 13px;
 }
+
+.filter-card {
+  margin-bottom: 16px;
+
+  &::ng-deep .ant-card-body {
+    padding: 12px 16px;
+  }
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &--grow {
+    flex: 1;
+    min-width: 0;
+
+    &::ng-deep .input-grow {
+      width: 100%;
+    }
+  }
+}
+
+.filter-label {
+  font-size: 13px;
+  color: #595959;
+  white-space: nowrap;
+}
+
+.result-count {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-left: 4px;
+}

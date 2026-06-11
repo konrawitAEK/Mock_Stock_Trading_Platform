@@ -11,11 +11,11 @@
       </li>
       <li nz-menu-item routerLink="/stocks" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="stock"></span>
-        <span>Stocks</span>
+        <span>Stocks Market</span>
       </li>
       <li nz-menu-item routerLink="/transactions" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="history"></span>
-        <span>Transactions</span>
+        <span>Transactions History</span>
       </li>
     </ul>
   </nz-sider>
@@ -25,6 +25,7 @@
         class="collapse-trigger"
         (click)="isCollapsed = !isCollapsed">
       </span>
+      <span class="app-header-title">Mock Stock Trading Platform</span>
     </nz-header>
     <nz-content class="app-content">
       <router-outlet />

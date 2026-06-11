@@ -12,6 +12,9 @@ export class TransactionsComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
+  filterSymbol = '';
+  filterType: 'ALL' | 'BUY' | 'SELL' = 'ALL';
+
   constructor(private transactionService: TransactionService) {}
 
   ngOnInit(): void {
@@ -19,6 +22,23 @@ export class TransactionsComponent implements OnInit {
       next: data => { this.transactions = data; this.loading = false; },
       error: err => { this.error = err.message; this.loading = false; },
     });
+  }
+
+  get filteredTransactions(): Transaction[] {
+    return this.transactions.filter(t => {
+      const symbolMatch = !this.filterSymbol || t.symbol.toUpperCase().includes(this.filterSymbol.toUpperCase());
+      const typeMatch = this.filterType === 'ALL' || t.type === this.filterType;
+      return symbolMatch && typeMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filterSymbol = '';
+    this.filterType = 'ALL';
+  }
+
+  get hasActiveFilter(): boolean {
+    return !!this.filterSymbol || this.filterType !== 'ALL';
   }
 
   formatCurrency(value: number): string {
