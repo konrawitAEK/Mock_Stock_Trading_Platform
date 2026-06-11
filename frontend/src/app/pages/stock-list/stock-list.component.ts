@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -14,14 +13,16 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { StockService } from '../../core/services/stock.service';
 import { MarketService } from '../../core/services/market.service';
 import { Stock } from '../../core/models';
+import { StockDetailDrawerComponent } from '../../shared/stock-detail-drawer/stock-detail-drawer.component';
 
 @Component({
   selector: 'app-stock-list',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterLink,
+    CommonModule, FormsModule,
     NzTableModule, NzInputModule, NzButtonModule,
     NzTagModule, NzSpinModule, NzAlertModule, NzIconModule, NzCardModule,
+    StockDetailDrawerComponent,
   ],
   templateUrl: './stock-list.component.html',
 })
@@ -32,6 +33,9 @@ export class StockListComponent implements OnInit {
   simulating = false;
   error: string | null = null;
   searchQuery = '';
+
+  drawerVisible = false;
+  selectedSymbol: string | null = null;
 
   constructor(
     private stockService: StockService,
@@ -64,6 +68,11 @@ export class StockListComponent implements OnInit {
 
   onSearch(): void {
     this.applyFilter();
+  }
+
+  openDrawer(symbol: string): void {
+    this.selectedSymbol = symbol;
+    this.drawerVisible = true;
   }
 
   simulate(): void {
