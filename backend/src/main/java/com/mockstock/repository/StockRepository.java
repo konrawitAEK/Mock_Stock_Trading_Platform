@@ -1,6 +1,6 @@
 package com.mockstock.repository;
 
-import com.mockstock.model.Stock;
+import com.mockstock.entity.Stock;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StockRepository extends JpaRepository<Stock, String> {}

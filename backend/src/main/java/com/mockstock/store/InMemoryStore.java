@@ -1,8 +1,8 @@
 package com.mockstock.store;
 
-import com.mockstock.model.PortfolioItem;
-import com.mockstock.model.Stock;
-import com.mockstock.model.Transaction;
+import com.mockstock.entity.PortfolioItem;
+import com.mockstock.entity.Stock;
+import com.mockstock.entity.Transaction;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -1,7 +1,7 @@
 package com.mockstock.controller;
 
 import com.mockstock.dto.ApiResponse;
-import com.mockstock.dto.PortfolioResponse;
+import com.mockstock.dto.response.PortfolioResponse;
 import com.mockstock.service.TradingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +16,8 @@ public class PortfolioController {
         this.tradingService = tradingService;
     }
 
-    /**
-     * GET /portfolio — portfolio summary with holdings
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<PortfolioResponse>> getPortfolio() {
-        PortfolioResponse portfolio = tradingService.buildPortfolioResponse();
-        return ResponseEntity.ok(ApiResponse.ok(portfolio));
+        return ResponseEntity.ok(ApiResponse.ok(tradingService.buildPortfolioResponse()));
     }
 }

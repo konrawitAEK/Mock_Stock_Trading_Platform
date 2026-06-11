@@ -1,7 +1,7 @@
 package com.mockstock.controller;
 
 import com.mockstock.dto.ApiResponse;
-import com.mockstock.model.Transaction;
+import com.mockstock.entity.Transaction;
 import com.mockstock.service.TradingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

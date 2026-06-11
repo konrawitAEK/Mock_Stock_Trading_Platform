@@ -32,7 +32,7 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_timestamp ON transactions (timestamp DESC);
 
 CREATE TABLE user_state (
-    id   INT           NOT NULL,
+    id   BIGINT        NOT NULL,
     cash DECIMAL(15,4) NOT NULL,
     CONSTRAINT pk_user_state PRIMARY KEY (id)
 );

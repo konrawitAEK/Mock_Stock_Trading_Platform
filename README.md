@@ -15,7 +15,7 @@
 | Layer    | Technology                                                         |
 |----------|--------------------------------------------------------------------|
 | Frontend | Angular 18 (Standalone Components), TypeScript, ng-zorro-antd 18 (Ant Design) |
-| Backend  | Java 17, Spring Boot 3.2, Maven                                    |
+| Backend  | Java 17, Spring Boot 3.2, Maven, Lombok, Swagger (SpringDoc OpenAPI) |
 | Storage  | PostgreSQL 16 (Spring Data JPA + Flyway migrations)                |
 
 ---
@@ -35,6 +35,9 @@
 - [x] **UI ที่ใช้งานง่าย** — Ant Design components, Responsive layout, Toast notifications
 - [x] **API Response สม่ำเสมอ** — `{ success, data, message }` ทุก endpoint
 - [x] **Service Layer** — Angular HttpClient แยกเป็น ApiService + domain services
+- [x] **Lombok** — ลด boilerplate ใน Entity และ DTO ด้วย `@Getter @Setter @NoArgsConstructor @AllArgsConstructor`
+- [x] **Swagger / OpenAPI** — UI ที่ `/swagger-ui.html` สำหรับ test API โดยไม่ต้องใช้ Postman
+- [x] **DTO refactor** — แยก `dto/request/` และ `dto/response/` พร้อม static `from()` factory method
 
 ## Features ที่ยังไม่เสร็จ
 
@@ -97,7 +100,7 @@ cd backend
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev   # หรือ npm start
 ```
 
 UI จะเปิดที่ **http://localhost:3000**
@@ -155,10 +158,16 @@ Mock_Stock_Trading_Platform/
 │   ├── pom.xml
 │   └── src/main/java/com/mockstock/
 │       ├── MockStockApplication.java
-│       ├── config/CorsConfig.java
-│       ├── model/                      # Stock, PortfolioItem, Transaction, UserState (@Entity)
-│       ├── dto/                        # ApiResponse<T>, OrderRequest, PortfolioResponse,
-│       │                               # HoldingItem, StockDetailResponse
+│       ├── config/
+│       │   ├── CorsConfig.java
+│       │   └── SwaggerConfig.java      # OpenAPI bean → /swagger-ui.html
+│       ├── entity/                     # Stock, PortfolioItem, Transaction, UserState (@Entity + Lombok)
+│       ├── dto/
+│       │   ├── ApiResponse.java        # wrapper { success, data, message }
+│       │   ├── request/
+│       │   │   └── OrderRequest.java
+│       │   └── response/               # HoldingItem, PortfolioResponse, StockDetailResponse
+│       │       └── (from() factory methods สำหรับแปลง entity → DTO)
 │       ├── repository/                 # StockRepository, PortfolioItemRepository,
 │       │                               # TransactionRepository, UserStateRepository
 │       ├── store/                      # TradingStore (interface), JpaStore (@Component),

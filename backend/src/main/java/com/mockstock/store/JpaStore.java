@@ -1,9 +1,9 @@
 package com.mockstock.store;
 
-import com.mockstock.model.PortfolioItem;
-import com.mockstock.model.Stock;
-import com.mockstock.model.Transaction;
-import com.mockstock.model.UserState;
+import com.mockstock.entity.PortfolioItem;
+import com.mockstock.entity.Stock;
+import com.mockstock.entity.Transaction;
+import com.mockstock.entity.UserState;
 import com.mockstock.repository.PortfolioItemRepository;
 import com.mockstock.repository.StockRepository;
 import com.mockstock.repository.TransactionRepository;

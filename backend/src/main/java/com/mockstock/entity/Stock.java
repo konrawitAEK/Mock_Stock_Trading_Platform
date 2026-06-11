@@ -1,12 +1,18 @@
-package com.mockstock.model;
+package com.mockstock.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "stocks")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Stock {
 
     @Id
@@ -34,8 +40,6 @@ public class Stock {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    public Stock() {}
-
     public Stock(String symbol, String companyName, double currentPrice,
                  String sector, String description) {
         this.symbol = symbol;
@@ -47,28 +51,4 @@ public class Stock {
         this.sector = sector;
         this.description = description;
     }
-
-    public String getSymbol() { return symbol; }
-    public void setSymbol(String symbol) { this.symbol = symbol; }
-
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-
-    public double getCurrentPrice() { return currentPrice; }
-    public void setCurrentPrice(double currentPrice) { this.currentPrice = currentPrice; }
-
-    public double getPreviousPrice() { return previousPrice; }
-    public void setPreviousPrice(double previousPrice) { this.previousPrice = previousPrice; }
-
-    public double getDailyChange() { return dailyChange; }
-    public void setDailyChange(double dailyChange) { this.dailyChange = dailyChange; }
-
-    public double getChangePercent() { return changePercent; }
-    public void setChangePercent(double changePercent) { this.changePercent = changePercent; }
-
-    public String getSector() { return sector; }
-    public void setSector(String sector) { this.sector = sector; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 }

@@ -1,4 +1,4 @@
-package com.mockstock.model;
+package com.mockstock.entity;
 
 public enum TransactionType {
     BUY,

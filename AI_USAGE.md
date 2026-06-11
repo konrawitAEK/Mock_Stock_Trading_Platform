@@ -1,134 +1,122 @@
-# AI Usage Documentation
+# บันทึกการใช้ AI (Claude Code)
 
-This document describes how AI (Claude Code) was used throughout this project, as required by the assignment.
-
----
-
-## 1. What AI Was Used For
-
-- **Requirement analysis** — Breaking down the Thai-language requirements document into a prioritized feature list with clear frontend/backend/data model boundaries
-- **Data model design** — Designing the `Stock`, `PortfolioItem`, `Transaction` models and the `InMemoryStore` structure, with guidance on how to migrate to a real database later
-- **Backend scaffolding** — Generating the full Spring Boot project structure: models, DTOs, service layer, controllers, exception handler, and unit tests
-- **Business logic** — Implementing buy/sell flows with correct avg buy price calculation, cash deduction/credit, and portfolio mutation
-- **Simulate Market logic** — Implementing the `simulateMarket()` method with bounded random price changes (±5%) and the rule that `previousPrice` is set before updating `currentPrice`
-- **Frontend scaffolding** — Generating the full Angular 17 project structure: standalone components, lazy-loaded routing, service layer with Angular HttpClient, ng-zorro-antd UI components
-- **Refactoring** — Migrating the API layer to a typed service structure (`ApiService` + domain services), replacing raw `fetch` with Angular `HttpClient`
-- **Documentation** — Drafting README.md (architecture, DB migration guide, run instructions) and this AI_USAGE.md
+เอกสารนี้บันทึกการใช้ AI ตลอดการพัฒนาโปรเจกต์นี้
 
 ---
 
-## 2. Example Prompts Used
+## 1. สิ่งที่ใช้ AI ช่วย
 
-### Prompt 1 — Requirement Breakdown
-> "Read these requirements for a Mock Stock Trading Platform (pasted full Thai spec). Extract: (1) all features, (2) all business rules, (3) all edge cases, (4) API endpoints needed, (5) data models needed. Present as structured lists."
-
-**Why used:** The spec was ~400 lines in Thai. Using AI to extract a structured checklist prevented missing edge cases like "avgBuyPrice must not change on sell" and "transaction price must be locked at trade time."
-
-### Prompt 2 — Data Model Design
-> "Design the data models for a stock trading platform with in-memory storage. Requirements: Stock (price, dailyChange, changePercent), PortfolioItem (symbol, quantity, avgBuyPrice), Transaction (locked price, immutable). Show Java class structure and explain how to migrate to PostgreSQL if needed."
-
-**Why used:** Needed to confirm the correct fields before writing any code. Key insight: `previousPrice` stored on `Stock` so `dailyChange` can be computed after each simulate without needing a separate history table.
-
-### Prompt 3 — Buy/Sell Logic
-> "Write a TradingService.buyStock(symbol, quantity) method for Spring Boot. Rules: validate quantity > 0, validate stock exists, validate cash >= price * quantity, deduct cash, compute new avgBuyPrice = ((oldQty * oldAvg) + (newQty * price)) / (oldQty + newQty), add transaction with locked price. Return PortfolioResponse."
-
-**Why used:** The weighted average price formula is easy to get wrong. Delegating the first draft to AI and then verifying against the spec's example `((10×100)+(10×200))/20 = 150` confirmed correctness.
-
-### Prompt 4 — Simulate Market Logic
-> "Write simulateMarket() for Spring Boot. Rules: for each stock, random change -5% to +5%, set previousPrice = currentPrice (old), newPrice = max(oldPrice * (1 + change/100), 0.01), update dailyChange and changePercent. Return all updated stocks."
-
-**Why used:** The order of operations matters — `previousPrice` must be captured before updating `currentPrice`, otherwise `dailyChange` would always be 0. The prompt explicitly specified this ordering.
-
-### Prompt 5 — Angular Service Layer
-> "Refactor the frontend API layer from raw fetch to Angular HttpClient. Create an ApiService that wraps GET/POST with automatic unwrapping of { success, data, message } responses — throw Error(message) if success is false. Then create separate domain services: StockService, PortfolioService, OrderService, TransactionService, MarketService, each injecting ApiService."
-
-**Why used:** Angular's idiomatic pattern is `Observable`-based services with `HttpClient`, not raw `fetch`. The separation by domain makes each service independently testable and extensible.
-
-### Prompt 6 — Angular Frontend Scaffolding
-> "Build a complete Angular 17 standalone components project replacing Next.js. Pages: Dashboard (portfolio stats + holdings table), Stock List (searchable + sortable), Stock Detail (buy/sell reactive forms + cost preview), Transactions (paginated history). Use ng-zorro-antd for UI. Use HttpClient via ApiService. Lazy-load all routes."
-
-**Why used:** Angular project setup (angular.json, tsconfig, app.config, routing, lazy loading) has many interdependent parts. AI generated the complete boilerplate correctly on the first pass; manual review was needed only for ng-zorro-antd peer dependency and tsconfig deprecation warnings.
-
-### Prompt 7 — Edge Case Review
-> "Review this trading platform implementation for edge cases. Check: buy with quantity 0, buy with insufficient cash, sell stock not held, sell more than held, simulate market resulting in price ≤ 0, transaction history changing when price changes. List any missing validations."
-
-**Why used:** After the first draft was complete, this prompt was used as a verification pass. It caught the 404 vs 500 distinction for unknown symbols and the `GlobalExceptionHandler` needing to handle `IllegalArgumentException` separately.
+- **วิเคราะห์ requirements** — แปลง spec ภาษาไทยให้เป็น feature list พร้อม business rules และ edge cases ที่ชัดเจน
+- **ออกแบบ data model** — ออกแบบ entity `Stock`, `PortfolioItem`, `Transaction`, `UserState` และ schema PostgreSQL
+- **สร้าง backend** — โครงสร้าง Spring Boot ทั้งหมด: entity, DTO, repository, store interface, service, controller, exception handler, unit tests
+- **สร้าง frontend** — โครงสร้าง Angular 18 ทั้งหมด: standalone components, lazy-loaded routing, service layer, ng-zorro-antd UI
+- **Migrate ไป PostgreSQL** — ออกแบบ `TradingStore` interface, `JpaStore` implementation, Flyway migrations, docker-compose
+- **Refactor** — เพิ่ม Lombok, Swagger/OpenAPI, แยก DTO เป็น request/response, เปลี่ยน package `model` → `entity`
+- **แก้ปัญหา Docker** — เปลี่ยน base image จาก `-alpine` เป็น `-jammy` รองรับ ARM64, เพิ่ม `.npmrc` สำหรับ peer deps
+- **เขียนเอกสาร** — README.md (ภาษาไทย) และไฟล์นี้
 
 ---
 
-## 3. What Was Edited After AI Generation
+## 2. ตัวอย่าง Prompt ที่ใช้
 
-1. **CORS configuration** — AI initially placed CORS settings in `application.properties`. Spring Boot 3.x requires a `WebMvcConfigurer` bean for full CORS control. Changed to `CorsConfig.java`.
+### Prompt 1 — วิเคราะห์ Requirements
+> "อ่าน spec ภาษาไทยนี้สำหรับระบบซื้อขายหุ้นจำลอง แยก: (1) features ทั้งหมด (2) business rules (3) edge cases (4) API endpoints ที่ต้องการ (5) data models ที่ต้องการ"
 
-2. **`buildPortfolioResponse()` total P/L calculation** — First AI draft computed `totalProfitLoss = totalPortfolioValue - 100000` (hardcoding initial cash). Corrected to `stockMarketValue - totalCostBasis` which correctly measures unrealized P/L on current holdings only.
+**เหตุผล:** Spec มีกว่า 400 บรรทัด ใช้ AI สกัดเป็น checklist เพื่อป้องกันการพลาด edge case เช่น "avgBuyPrice ต้องไม่เปลี่ยนเมื่อขาย" และ "ราคาใน transaction ต้องล็อก ณ เวลาทำรายการ"
 
-3. **Transactions sorted newest-first** — Initial `getTransactions()` returned the raw list in insertion order. Added `Collections.reverse(new ArrayList<>(...))` to return a copy in descending order without mutating the store.
+### Prompt 2 — ออกแบบ Data Model และ Business Logic
+> "เขียน TradingService.buyStock(symbol, quantity) สำหรับ Spring Boot กฎ: validate quantity > 0, validate stock exists, validate cash >= price × quantity, หักเงิน, คำนวณ avgBuyPrice ใหม่แบบ weighted average, บันทึก transaction พร้อมล็อกราคา"
 
-4. **Angular simulate button** — AI generated the button with no callback mechanism. Updated to accept an `onSimulated`-equivalent pattern so Dashboard and Stock List each refresh their own data after simulation.
+**เหตุผล:** สูตร weighted average price ผิดพลาดง่าย ใช้ AI draft แล้วตรวจสอบกับตัวอย่างในสเปก `((10×100)+(10×200))/20 = 150`
 
-5. **tsconfig.json deprecation warnings** — After removing `baseUrl` and `downlevelIteration` (both deprecated in TypeScript 5.5+), two follow-up errors appeared: missing `rootDir` (required when `outDir` is set without `baseUrl`) and the `paths` alias needing an explicit `./` prefix. Both were fixed manually after reading the IDE diagnostics.
+### Prompt 3 — Simulate Market Logic
+> "เขียน simulateMarket() กฎ: random ±5%, ต้องเก็บ previousPrice = currentPrice (เก่า) ก่อนอัปเดต newPrice, คำนวณ dailyChange และ changePercent"
 
-6. **Stock Detail "Your Position" section** — AI draft showed avg buy price as `0` when `heldQuantity` is 0, which is misleading. Changed to display `—` with a conditional check.
+**เหตุผล:** ลำดับการ set ค่าสำคัญมาก — ต้องเก็บ `previousPrice` ก่อนเปลี่ยน `currentPrice` ไม่เช่นนั้น `dailyChange` จะเป็น 0 เสมอ
+
+### Prompt 4 — Angular Service Layer
+> "สร้าง Angular 18 standalone components แทน Next.js หน้า: Dashboard, Stock List (ค้นหา/เรียงลำดับ), Stock Detail (ฟอร์มซื้อ/ขาย), Transactions ใช้ ng-zorro-antd และ HttpClient ผ่าน ApiService lazy-load ทุก route"
+
+**เหตุผล:** Angular project setup มีหลายส่วนที่ต้องสัมพันธ์กัน (angular.json, tsconfig, app.config, routing) AI generate boilerplate ได้ถูกต้องตั้งแต่ pass แรก
+
+### Prompt 5 — Migrate ไป PostgreSQL
+> "เพิ่ม PostgreSQL ใช้ Spring Data JPA + Flyway สร้าง TradingStore interface, JpaStore implementation, 4 repositories, Flyway V1 schema + V2 seed data, docker-compose พร้อม health check"
+
+**เหตุผล:** ต้องการให้ unit tests เดิมทำงานได้โดยไม่ต้องแก้ไข ใช้ strategy pattern ทำให้ `InMemoryStore` (สำหรับ test) และ `JpaStore` (production) แยกกันอย่างชัดเจน
+
+### Prompt 6 — Refactor ด้วย Pattern จาก POS project
+> "เพิ่ม Lombok ใน entity และ DTO, เพิ่ม Swagger/OpenAPI, แยก dto/request/ และ dto/response/ พร้อม static from() factory method, เปลี่ยน package model → entity"
+
+**เหตุผล:** ลด boilerplate ใน entity จาก ~70 บรรทัด (getter/setter ล้วน) เหลือ ~20 บรรทัด และทำให้ controller สะอาดขึ้นด้วย `StockDetailResponse.from(stock, holding)` แทนการประกอบ 12 บรรทัด
 
 ---
 
-## 4. Where AI Generated Incorrect Output
+## 3. สิ่งที่แก้ไขหลัง AI Generate
 
-### Issue 1: Wrong P/L total formula
-**What AI generated:**
+1. **CORS configuration** — AI ตั้งค่าใน `application.properties` แต่ Spring Boot 3.x ต้องการ `WebMvcConfigurer` bean แก้เป็น `CorsConfig.java`
+
+2. **`buildPortfolioResponse()` คำนวณ P/L ผิด** — Draft แรก hardcode `totalProfitLoss = totalPortfolioValue - 100000` แก้เป็น `stockMarketValue - totalCostBasis` ซึ่งวัด unrealized P/L บน holdings ปัจจุบันเท่านั้น
+
+3. **Transaction sort order** — `getTransactions()` คืน list ตามลำดับ insert เปลี่ยนให้ sort by timestamp descending ใน `TradingService` เพื่อให้ทำงานถูกต้องกับทั้ง `InMemoryStore` (test) และ `JpaStore` (production)
+
+4. **Docker base image ARM64** — `eclipse-temurin:17-jre-alpine` ไม่มี image สำหรับ ARM64 (Apple Silicon) เปลี่ยนเป็น `eclipse-temurin:17-jre-jammy`
+
+5. **npm ci peer deps** — `ng-zorro-antd` มี peer dependency conflicts ทำให้ `npm ci` ใน Docker ล้มเหลว แก้ด้วยการเพิ่มไฟล์ `.npmrc` ที่มี `legacy-peer-deps=true`
+
+6. **tsconfig.json deprecated options** — ลบ `baseUrl` และ `downlevelIteration` (deprecated ใน TypeScript 5.5+) แล้วเพิ่ม `rootDir` และแก้ `paths` alias ให้ใช้ relative path
+
+7. **`flyway-database-postgresql` dependency** — AI เพิ่ม artifact นี้ซึ่งใช้ได้เฉพาะ Flyway 10.x แต่ Spring Boot 3.2 ใช้ Flyway 9.x ที่รองรับ PostgreSQL ใน `flyway-core` อยู่แล้ว ลบออก
+
+8. **`UserState.id` type mismatch** — AI ใช้ Java `long` แต่ SQL schema ใช้ `INT` Hibernate 6 validate strict กว่า → ต้องเปลี่ยน SQL เป็น `BIGINT` และเพิ่ม V3 migration สำหรับ volume เก่า
+
+9. **`StockController` inject ผิด bean** — หลัง refactor `InMemoryStore` ไม่มี `@Component` แต่ `StockController` ยังใช้ `InMemoryStore` โดยตรง แก้ให้ inject `TradingService` แทน
+
+---
+
+## 4. จุดที่ AI Generate ผิด
+
+### ปัญหา 1: สูตร P/L hardcode
 ```java
-double totalProfitLoss = totalPortfolioValue - 100000.0; // WRONG
-```
-**Problem:** Hardcodes initial capital. If user sells all holdings, formula breaks — `cash - 100000` would show negative P/L even when the user profited on their trades.
+// AI generate (ผิด)
+double totalProfitLoss = totalPortfolioValue - 100000.0;
 
-**Fix applied:**
-```java
+// แก้เป็น
 double totalProfitLoss = stockMarketValue - totalCostBasis;
 ```
+**สาเหตุ:** hardcode initial capital ถ้าผู้ใช้ขายหุ้นทั้งหมด `cash - 100000` จะแสดงค่าผิด
 
-### Issue 2: CORS in properties file
-**What AI generated:** `spring.web.cors.allowed-origins=http://localhost:3000` in `application.properties`
+### ปัญหา 2: CORS ใน application.properties
+```properties
+# AI generate (ไม่ทำงาน)
+spring.web.cors.allowed-origins=http://localhost:3000
+```
+**สาเหตุ:** Spring Boot 3.x ไม่รองรับ property นี้ preflight request คืน `403 Forbidden` ต้องใช้ `@Configuration` bean
 
-**Problem:** Not a valid Spring Boot 3.x property. All preflight requests returned `403 Forbidden`.
+### ปัญหา 3: `@ctrl/tinycolor` peer dependency หายไป
+**สาเหตุ:** AI generate `package.json` ที่มี `ng-zorro-antd` แต่ลืม peer dependency `@ctrl/tinycolor` ทำให้ build ล้มเหลว พบเฉพาะตอน build ไม่ใช่ตอน install
 
-**Fix applied:** Created `CorsConfig.java` with `@Configuration` + `WebMvcConfigurer.addCorsMappings()`.
+### ปัญหา 4: `changePercent` assertion precision ใน test
+```java
+// AI generate (อาจ fail)
+assertTrue(Math.abs(stock.getChangePercent()) <= 5.0);
 
-### Issue 3: Missing `@ctrl/tinycolor` peer dependency
-**What AI generated:** `package.json` with `ng-zorro-antd` but without its required peer dependency `@ctrl/tinycolor`.
-
-**Problem:** Angular build failed with `Could not resolve "@ctrl/tinycolor"` — discovered only at build time, not at install time.
-
-**Fix applied:** Ran `npm install @ctrl/tinycolor`. npm automatically added it to `package.json`.
-
-### Issue 4: tsconfig.json deprecated options
-**What AI generated:** `"baseUrl": "./"` and `"downlevelIteration": true` — both deprecated in TypeScript 5.5+.
-
-**Problem:** VS Code showed deprecation errors. Removing `baseUrl` then caused two follow-on errors: `rootDir` missing and `paths` alias using a non-relative path.
-
-**Fix applied:**
-- Removed `baseUrl` and `downlevelIteration`
-- Added `"rootDir": "./src"`
-- Changed `"@env/*": ["src/environments/*"]` → `"@env/*": ["./src/environments/*"]`
-
-### Issue 5: `changePercent` assertion precision in tests
-**What AI generated in TradingServiceTest:** `assertTrue(Math.abs(stock.getChangePercent()) <= 5.0)` — fails due to floating-point arithmetic where `5.0 * 1.05` can slightly exceed 5.0.
-
-**Fix applied:** Changed to `<= 5.01` to accommodate floating-point rounding.
+// แก้เป็น
+assertTrue(Math.abs(stock.getChangePercent()) <= 5.01);
+```
+**สาเหตุ:** floating-point arithmetic ทำให้ `5.0 * 1.05` อาจเกิน 5.0 เล็กน้อย
 
 ---
 
-## 5. What Would Be Improved with More Time
+## 5. สิ่งที่จะปรับปรุงถ้ามีเวลาเพิ่ม
 
-1. **Persistent storage** — Replace `InMemoryStore` with Spring Data JPA + PostgreSQL. `TradingService` is already abstracted from the store, so only the `@Component` store layer needs to change.
+1. **Optimistic locking** — เพิ่ม `@Version` บน `UserState` entity เพื่อป้องกัน Race condition กรณีหลาย request ทำ buy/sell พร้อมกัน
 
-2. **Concurrency safety** — Add `synchronized` blocks or `ReentrantLock` around `buyStock`/`sellStock` to prevent two simultaneous requests from both passing the cash-sufficiency check.
+2. **กราฟราคาหุ้น** — เก็บ snapshot ราคาทุกครั้งที่ `simulateMarket()` ถูกเรียก แสดงเป็น line chart บนหน้า Stock Detail ด้วย ng2-charts
 
-3. **Price history chart** — Store a snapshot of all stock prices after each `simulateMarket()` call. Render a line chart on the Stock Detail page using ng2-charts (Chart.js wrapper for Angular).
+3. **Real-time update** — แทน "Simulate Market" ด้วย auto-simulate mode ผ่าน Server-Sent Events (SSE) หรือ WebSocket
 
-4. **Real-time updates** — Replace the manual "Simulate Market" button with an auto-simulate mode using Server-Sent Events (SSE) or WebSocket so the UI updates without user interaction.
+4. **Authentication** — เพิ่ม Spring Security + JWT, เพิ่ม `userId` FK บน `portfolio_items` และ `transactions` รองรับ multi-user
 
-5. **Frontend unit tests** — Add Jasmine/Karma unit tests for Angular services (buy/sell validation logic, avg price formula) and component tests using Angular Testing Library.
+5. **Frontend unit tests** — เขียน Jasmine/Karma tests สำหรับ Angular services และ component tests
 
-6. **E2E tests** — Add Cypress tests covering the full buy → portfolio update → transaction history flow and the simulate market → price update flow.
-
-7. **Multi-user support** — Add `userId` FK to `portfolio_items` and `transactions`, add Spring Security + JWT authentication, scope all queries per user.
+6. **E2E tests** — เพิ่ม Cypress tests ครอบคลุม flow ซื้อ → portfolio update → transaction history → simulate market

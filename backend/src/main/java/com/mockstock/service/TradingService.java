@@ -1,19 +1,20 @@
 package com.mockstock.service;
 
-import com.mockstock.dto.HoldingItem;
-import com.mockstock.dto.PortfolioResponse;
-import com.mockstock.model.PortfolioItem;
-import com.mockstock.model.Stock;
-import com.mockstock.model.Transaction;
-import com.mockstock.model.TransactionType;
+import com.mockstock.dto.response.HoldingItem;
+import com.mockstock.dto.response.PortfolioResponse;
+import com.mockstock.entity.PortfolioItem;
+import com.mockstock.entity.Stock;
+import com.mockstock.entity.Transaction;
+import com.mockstock.entity.TransactionType;
 import com.mockstock.store.TradingStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -147,21 +148,10 @@ public class TradingService {
             Stock stock = store.getStock(item.getSymbol());
             if (stock == null) continue;
 
-            double marketValue = stock.getCurrentPrice() * item.getQuantity();
-            double costBasis = item.getAvgBuyPrice() * item.getQuantity();
-            double profitLoss = marketValue - costBasis;
-
-            stockMarketValue += marketValue;
-            totalCostBasis += costBasis;
-
-            holdings.add(new HoldingItem(
-                    item.getSymbol(),
-                    stock.getCompanyName(),
-                    item.getQuantity(),
-                    item.getAvgBuyPrice(),
-                    stock.getCurrentPrice(),
-                    marketValue,
-                    profitLoss));
+            HoldingItem holdingItem = HoldingItem.from(item, stock);
+            stockMarketValue += holdingItem.getMarketValue();
+            totalCostBasis += item.getAvgBuyPrice() * item.getQuantity();
+            holdings.add(holdingItem);
         }
 
         double totalPortfolioValue = store.getCash() + stockMarketValue;
@@ -172,8 +162,23 @@ public class TradingService {
 
     @Transactional(readOnly = true)
     public List<Transaction> getTransactions() {
-        List<Transaction> sorted = new ArrayList<>(store.getTransactions());
-        Collections.reverse(sorted);
-        return sorted;
+        return store.getTransactions().stream()
+                .sorted(Comparator.comparing(Transaction::getTimestamp).reversed())
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Stock> getStocks() {
+        return store.getStocks();
+    }
+
+    @Transactional(readOnly = true)
+    public Stock getStock(String symbol) {
+        return store.getStock(symbol);
+    }
+
+    @Transactional(readOnly = true)
+    public PortfolioItem getPortfolioItem(String symbol) {
+        return store.getPortfolioItem(symbol);
     }
 }

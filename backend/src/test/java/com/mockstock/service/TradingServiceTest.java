@@ -1,10 +1,10 @@
 package com.mockstock.service;
 
-import com.mockstock.dto.PortfolioResponse;
-import com.mockstock.model.PortfolioItem;
-import com.mockstock.model.Stock;
-import com.mockstock.model.Transaction;
-import com.mockstock.model.TransactionType;
+import com.mockstock.dto.response.PortfolioResponse;
+import com.mockstock.entity.PortfolioItem;
+import com.mockstock.entity.Stock;
+import com.mockstock.entity.Transaction;
+import com.mockstock.entity.TransactionType;
 import com.mockstock.store.InMemoryStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
