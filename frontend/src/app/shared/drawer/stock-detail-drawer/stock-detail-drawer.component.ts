@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { StockService } from '../../../core/services/stock.service';
 import { OrderService } from '../../../core/services/order.service';
 import { PortfolioService } from '../../../core/services/portfolio.service';
-import { StockDetail, TradeLimits } from '../../../core/models';
+import { StockDetail, TradeLimits, OrderRequest } from '../../../core/models';
 
 type TradeMode = 'BUY' | 'SELL';
 
@@ -122,14 +122,16 @@ export class StockDetailDrawerComponent implements OnChanges {
     if (this.buyForm.invalid || !this.stock) return;
     this.buying = true;
     this.buyError = null;
-    const qty = this.buyForm.value.quantity as number;
-    const symbol = this.stock.symbol;
-    this.orderService.buy({ symbol, quantity: qty }).subscribe({
+    const payload: OrderRequest = {
+      symbol: this.stock.symbol,
+      quantity: this.buyForm.value.quantity as number,
+    };
+    this.orderService.buy(payload).subscribe({
       next: () => {
-        this.message.success(`Bought ${qty} shares of ${symbol}`);
+        this.message.success(`Bought ${payload.quantity} shares of ${payload.symbol}`);
         this.buying = false;
         this.buyForm.reset({ quantity: 1 });
-        this.loadStock(symbol);
+        this.loadStock(payload.symbol);
         this.refreshCash();
         this.traded.emit();
       },
@@ -141,14 +143,16 @@ export class StockDetailDrawerComponent implements OnChanges {
     if (this.sellForm.invalid || !this.stock) return;
     this.selling = true;
     this.sellError = null;
-    const qty = this.sellForm.value.quantity as number;
-    const symbol = this.stock.symbol;
-    this.orderService.sell({ symbol, quantity: qty }).subscribe({
+    const payload: OrderRequest = {
+      symbol: this.stock.symbol,
+      quantity: this.sellForm.value.quantity as number,
+    };
+    this.orderService.sell(payload).subscribe({
       next: () => {
-        this.message.success(`Sold ${qty} shares of ${symbol}`);
+        this.message.success(`Sold ${payload.quantity} shares of ${payload.symbol}`);
         this.selling = false;
         this.sellForm.reset({ quantity: 1 });
-        this.loadStock(symbol);
+        this.loadStock(payload.symbol);
         this.refreshCash();
         this.traded.emit();
       },
