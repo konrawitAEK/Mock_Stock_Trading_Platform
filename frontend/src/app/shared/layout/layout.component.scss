@@ -6,14 +6,20 @@
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
   color: #c8922a;
   font-size: 16px;
   font-weight: 700;
-  padding: 0 16px;
+  padding: 0 14px;
   overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   letter-spacing: 0.03em;
+}
+
+.logo-text {
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 ::ng-deep .ant-layout-sider {
@@ -46,19 +52,53 @@
   box-shadow: 0 2px 8px rgba(27, 42, 74, 0.3);
 }
 
-.collapse-trigger {
-  font-size: 18px;
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
   cursor: pointer;
-  color: #fff;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background 0.2s;
 
   &:hover {
-    color: #c8922a;
+    background: rgba(200, 146, 42, 0.15);
+  }
+
+  .bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    transform-origin: center;
+  }
+
+  &.is-open {
+    .bar:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .bar:nth-child(2) {
+      opacity: 0;
+      width: 0;
+    }
+    .bar:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
   }
 }
 
 .app-header-title {
   margin-left: 16px;
-  font-size: 16px;
+  font-size: 30px;
   font-weight: 600;
   color: #fff;
   letter-spacing: 0.02em;
