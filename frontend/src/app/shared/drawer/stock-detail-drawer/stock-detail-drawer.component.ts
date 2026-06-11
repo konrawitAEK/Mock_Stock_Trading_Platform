@@ -1,17 +1,24 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { StockService } from '../../../core/services/stock.service';
-import { OrderService } from '../../../core/services/order.service';
-import { PortfolioService } from '../../../core/services/portfolio.service';
-import { StockDetail, TradeLimits, OrderRequest } from '../../../core/models';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { StockService } from "../../../core/services/stock.service";
+import { OrderService } from "../../../core/services/order.service";
+import { PortfolioService } from "../../../core/services/portfolio.service";
+import { StockDetail, TradeLimits, OrderRequest } from "../../../core/models";
 
-type TradeMode = 'BUY' | 'SELL';
+type TradeMode = "BUY" | "SELL";
 
 @Component({
-  selector: 'app-stock-detail-drawer',
-  templateUrl: './stock-detail-drawer.component.html',
-  styleUrl: './stock-detail-drawer.component.scss',
+  selector: "app-stock-detail-drawer",
+  templateUrl: "./stock-detail-drawer.component.html",
+  styleUrl: "./stock-detail-drawer.component.scss",
 })
 export class StockDetailDrawerComponent implements OnChanges {
   @Input() visible = false;
@@ -26,7 +33,7 @@ export class StockDetailDrawerComponent implements OnChanges {
   limitsLoading = false;
   error: string | null = null;
   notFound = false;
-  mode: TradeMode = 'BUY';
+  mode: TradeMode = "BUY";
 
   buyForm: FormGroup;
   sellForm: FormGroup;
@@ -43,34 +50,59 @@ export class StockDetailDrawerComponent implements OnChanges {
     private fb: FormBuilder,
   ) {
     this.buyForm = this.fb.group({
-      quantity: [1, [Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]],
+      quantity: [
+        1,
+        [
+          Validators.required,
+          Validators.min(1),
+          Validators.pattern("^[0-9]+$"),
+        ],
+      ],
     });
     this.sellForm = this.fb.group({
-      quantity: [1, [Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]],
+      quantity: [
+        1,
+        [
+          Validators.required,
+          Validators.min(1),
+          Validators.pattern("^[0-9]+$"),
+        ],
+      ],
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const becameVisible = changes['visible']?.currentValue === true && changes['visible']?.previousValue !== true;
-    const symbolChanged = changes['symbol'] && this.visible;
+    const becameVisible =
+      changes["visible"]?.currentValue === true &&
+      changes["visible"]?.previousValue !== true;
+    const symbolChanged = changes["symbol"] && this.visible;
 
     if ((becameVisible || symbolChanged) && this.symbol) {
       this.loadStock(this.symbol);
     }
 
     if (becameVisible) {
-      this.portfolioService.get().subscribe({ next: p => { this.cash = p.cash; } });
+      this.portfolioService.get().subscribe({
+        next: (p) => {
+          this.cash = p.cash;
+        },
+      });
     }
 
     if ((becameVisible || symbolChanged) && this.symbol) {
       this.limitsLoading = true;
       this.orderService.getLimits(this.symbol).subscribe({
-        next: limits => { this.tradeLimits = limits; this.limitsLoading = false; },
-        error: () => { this.limitsLoading = false; },
+        next: (limits) => {
+          this.tradeLimits = limits;
+          this.limitsLoading = false;
+        },
+        error: () => {
+          this.limitsLoading = false;
+        },
       });
     }
 
-    if (changes['visible']?.currentValue === false) {
+    if (changes["visible"]?.currentValue === false) {
       this.stock = null;
       this.tradeLimits = null;
       this.limitsLoading = false;
@@ -78,7 +110,7 @@ export class StockDetailDrawerComponent implements OnChanges {
       this.notFound = false;
       this.buyError = null;
       this.sellError = null;
-      this.mode = 'BUY';
+      this.mode = "BUY";
       this.buyForm.reset({ quantity: 1 });
       this.sellForm.reset({ quantity: 1 });
     }
@@ -89,9 +121,12 @@ export class StockDetailDrawerComponent implements OnChanges {
     this.error = null;
     this.notFound = false;
     this.stockService.getBySymbol(symbol).subscribe({
-      next: data => { this.stock = data; this.loading = false; },
-      error: err => {
-        if (err.message?.toLowerCase().includes('not found')) {
+      next: (data) => {
+        this.stock = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        if (err.message?.toLowerCase().includes("not found")) {
           this.notFound = true;
         } else {
           this.error = err.message;
@@ -108,12 +143,12 @@ export class StockDetailDrawerComponent implements OnChanges {
   }
 
   get buyCost(): number {
-    const qty = this.buyForm.get('quantity')?.value as number;
+    const qty = this.buyForm.get("quantity")?.value as number;
     return this.stock ? (qty || 0) * this.stock.currentPrice : 0;
   }
 
   get sellProceeds(): number {
-    const qty = this.sellForm.get('quantity')?.value as number;
+    const qty = this.sellForm.get("quantity")?.value as number;
     return this.stock ? (qty || 0) * this.stock.currentPrice : 0;
   }
 
@@ -127,13 +162,18 @@ export class StockDetailDrawerComponent implements OnChanges {
     };
     this.orderService.buy(payload).subscribe({
       next: () => {
-        this.message.success(`Bought ${payload.quantity} shares of ${payload.symbol}`);
+        this.message.success(
+          `Bought ${payload.quantity} shares of ${payload.symbol}`,
+        );
         this.buying = false;
         this.buyForm.reset({ quantity: 1 });
         this.loadStock(payload.symbol);
         this.close();
       },
-      error: err => { this.buyError = err.message; this.buying = false; },
+      error: (err) => {
+        this.buyError = err.message;
+        this.buying = false;
+      },
     });
   }
 
@@ -147,13 +187,18 @@ export class StockDetailDrawerComponent implements OnChanges {
     };
     this.orderService.sell(payload).subscribe({
       next: () => {
-        this.message.success(`Sold ${payload.quantity} shares of ${payload.symbol}`);
+        this.message.success(
+          `Sold ${payload.quantity} shares of ${payload.symbol}`,
+        );
         this.selling = false;
         this.sellForm.reset({ quantity: 1 });
         this.loadStock(payload.symbol);
         this.close();
       },
-      error: err => { this.sellError = err.message; this.selling = false; },
+      error: (err) => {
+        this.sellError = err.message;
+        this.selling = false;
+      },
     });
   }
 
@@ -162,12 +207,20 @@ export class StockDetailDrawerComponent implements OnChanges {
   }
 
   formatCurrency(value: number): string {
-    return '฿' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (
+      "฿" +
+      value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
   }
 
   formatPercent(value: number): string {
-    return (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
+    return (value >= 0 ? "+" : "") + value.toFixed(2) + "%";
   }
 
-  isPositive(val: number): boolean { return val >= 0; }
+  isPositive(val: number): boolean {
+    return val >= 0;
+  }
 }

@@ -24,9 +24,7 @@ public class PortfolioService {
     private final StockRepository stockRepo;
     private final UserStateRepository userStateRepo;
 
-    public PortfolioService(PortfolioItemRepository portfolioRepo,
-                            StockRepository stockRepo,
-                            UserStateRepository userStateRepo) {
+    public PortfolioService(PortfolioItemRepository portfolioRepo, StockRepository stockRepo, UserStateRepository userStateRepo) {
         this.portfolioRepo = portfolioRepo;
         this.stockRepo = stockRepo;
         this.userStateRepo = userStateRepo;
@@ -37,8 +35,7 @@ public class PortfolioService {
     }
 
     public void setCash(BigDecimal cash) {
-        UserState state = userStateRepo.findById(USER_ID)
-                .orElseGet(() -> new UserState(USER_ID, new BigDecimal("100000.00")));
+        UserState state = userStateRepo.findById(USER_ID).orElseGet(() -> new UserState(USER_ID, new BigDecimal("100000.00")));
         state.setCash(cash);
         userStateRepo.save(state);
     }
@@ -59,8 +56,7 @@ public class PortfolioService {
         }
 
         BigDecimal cash = getCash();
-        return new PortfolioResponse(cash, stockMarketValue, cash.add(stockMarketValue),
-                stockMarketValue.subtract(totalCostBasis), holdings);
+        return new PortfolioResponse(cash, stockMarketValue, cash.add(stockMarketValue), stockMarketValue.subtract(totalCostBasis), holdings);
     }
 
     @Transactional(readOnly = true)

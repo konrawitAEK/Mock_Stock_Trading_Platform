@@ -25,10 +25,7 @@ public class OrderService {
     private final TransactionRepository txRepo;
     private final PortfolioService portfolioService;
 
-    public OrderService(StockRepository stockRepo,
-                        PortfolioItemRepository portfolioRepo,
-                        TransactionRepository txRepo,
-                        PortfolioService portfolioService) {
+    public OrderService(StockRepository stockRepo, PortfolioItemRepository portfolioRepo, TransactionRepository txRepo, PortfolioService portfolioService) {
         this.stockRepo = stockRepo;
         this.portfolioRepo = portfolioRepo;
         this.txRepo = txRepo;
@@ -36,15 +33,12 @@ public class OrderService {
     }
 
     private int computeMaxBuyQty(BigDecimal cash, BigDecimal price) {
-        return price.compareTo(BigDecimal.ZERO) > 0
-                ? cash.divideToIntegralValue(price).intValue()
-                : 0;
+        return price.compareTo(BigDecimal.ZERO) > 0 ? cash.divideToIntegralValue(price).intValue() : 0;
     }
 
     @Transactional(readOnly = true)
     public TradeLimitsResponse getTradeLimits(String symbol) {
-        Stock stock = stockRepo.findById(symbol)
-                .orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
+        Stock stock = stockRepo.findById(symbol).orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
 
         BigDecimal cash = portfolioService.getCash();
         int maxBuy = computeMaxBuyQty(cash, stock.getCurrentPrice());
@@ -59,15 +53,14 @@ public class OrderService {
     public PortfolioResponse buyStock(String symbol, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
 
-        Stock stock = stockRepo.findById(symbol)
-                .orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
+        Stock stock = stockRepo.findById(symbol).orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
 
         BigDecimal price = stock.getCurrentPrice();
         BigDecimal cash = portfolioService.getCash();
         int maxBuyQty = computeMaxBuyQty(cash, price);
 
-        if (quantity > maxBuyQty) throw new IllegalArgumentException(
-                String.format("Exceeds maximum buyable quantity. Max: %d, Requested: %d", maxBuyQty, quantity));
+        if (quantity > maxBuyQty)
+            throw new IllegalArgumentException(String.format("Exceeds maximum buyable quantity. Max: %d, Requested: %d", maxBuyQty, quantity));
 
         BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
 
@@ -75,9 +68,7 @@ public class OrderService {
 
         PortfolioItem existing = portfolioRepo.findById(symbol).orElse(null);
         if (existing != null) {
-            BigDecimal newAvg = existing.getAvgBuyPrice().multiply(BigDecimal.valueOf(existing.getQuantity()))
-                    .add(price.multiply(BigDecimal.valueOf(quantity)))
-                    .divide(BigDecimal.valueOf(existing.getQuantity() + quantity), 4, RoundingMode.HALF_UP);
+            BigDecimal newAvg = existing.getAvgBuyPrice().multiply(BigDecimal.valueOf(existing.getQuantity())).add(price.multiply(BigDecimal.valueOf(quantity))).divide(BigDecimal.valueOf(existing.getQuantity() + quantity), 4, RoundingMode.HALF_UP);
             existing.setAvgBuyPrice(newAvg);
             existing.setQuantity(existing.getQuantity() + quantity);
         } else {
@@ -85,8 +76,7 @@ public class OrderService {
         }
         portfolioRepo.save(existing);
 
-        txRepo.save(new Transaction(UUID.randomUUID().toString(), LocalDateTime.now(),
-                TransactionType.BUY, symbol, stock.getCompanyName(), quantity, price, total));
+        txRepo.save(new Transaction(UUID.randomUUID().toString(), LocalDateTime.now(), TransactionType.BUY, symbol, stock.getCompanyName(), quantity, price, total));
 
         return portfolioService.buildPortfolioResponse();
     }
@@ -95,15 +85,13 @@ public class OrderService {
     public PortfolioResponse sellStock(String symbol, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
 
-        Stock stock = stockRepo.findById(symbol)
-                .orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
+        Stock stock = stockRepo.findById(symbol).orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
 
-        PortfolioItem holding = portfolioRepo.findById(symbol)
-                .orElseThrow(() -> new IllegalArgumentException("You do not hold any shares of: " + symbol));
+        PortfolioItem holding = portfolioRepo.findById(symbol).orElseThrow(() -> new IllegalArgumentException("You do not hold any shares of: " + symbol));
 
         int maxSellQty = holding.getQuantity();
-        if (quantity > maxSellQty) throw new IllegalArgumentException(
-                String.format("Exceeds maximum sellable quantity. Max: %d, Requested: %d", maxSellQty, quantity));
+        if (quantity > maxSellQty)
+            throw new IllegalArgumentException(String.format("Exceeds maximum sellable quantity. Max: %d, Requested: %d", maxSellQty, quantity));
 
         BigDecimal price = stock.getCurrentPrice();
         BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
@@ -118,8 +106,7 @@ public class OrderService {
             portfolioRepo.save(holding);
         }
 
-        txRepo.save(new Transaction(UUID.randomUUID().toString(), LocalDateTime.now(),
-                TransactionType.SELL, symbol, stock.getCompanyName(), quantity, price, total));
+        txRepo.save(new Transaction(UUID.randomUUID().toString(), LocalDateTime.now(), TransactionType.SELL, symbol, stock.getCompanyName(), quantity, price, total));
 
         return portfolioService.buildPortfolioResponse();
     }
