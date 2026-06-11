@@ -58,6 +58,7 @@
               <th>Current Price</th>
               <th>Market Value</th>
               <th>P / L</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -71,9 +72,17 @@
               <td [style.color]="isProfitable(h.profitLoss) ? '#52c41a' : '#ff4d4f'">
                 <strong>{{ (isProfitable(h.profitLoss) ? '+' : '') + formatCurrency(h.profitLoss) }}</strong>
               </td>
+              <td>
+                <button nz-button nzType="primary" nzSize="small" (click)="openDrawer(h, 'BUY')" style="margin-right:8px;">
+                  <span nz-icon nzType="arrow-up"></span> Buy
+                </button>
+                <button nz-button nzDanger nzSize="small" (click)="openDrawer(h, 'SELL')">
+                  <span nz-icon nzType="arrow-down"></span> Sell
+                </button>
+              </td>
             </tr>
             <tr *ngIf="portfolio.holdings.length === 0">
-              <td colspan="7" style="text-align:center;color:#bfbfbf;padding:40px;">
+              <td colspan="8" style="text-align:center;color:#bfbfbf;padding:40px;">
                 No holdings — buy some stocks to get started.
               </td>
             </tr>
@@ -83,3 +92,11 @@
     </ng-container>
   </div>
 </nz-spin>
+
+<!-- Trade Drawer (shared util) -->
+<app-trading-drawer
+  [(visible)]="drawerVisible"
+  [holding]="selectedHolding"
+  [mode]="drawerMode"
+  (traded)="onTraded()">
+</app-trading-drawer>

@@ -11,7 +11,8 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { PortfolioService } from '../../core/services/portfolio.service';
 import { MarketService } from '../../core/services/market.service';
-import { PortfolioResponse } from '../../core/models';
+import { HoldingItem, PortfolioResponse } from '../../core/models';
+import { TradingDrawerComponent, TradeMode } from '../../shared/trading-drawer/trading-drawer.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ import { PortfolioResponse } from '../../core/models';
     CommonModule,
     NzTableModule, NzCardModule, NzButtonModule,
     NzSpinModule, NzAlertModule, NzTagModule, NzIconModule, NzGridModule,
+    TradingDrawerComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -28,6 +30,10 @@ export class DashboardComponent implements OnInit {
   loading = true;
   simulating = false;
   error: string | null = null;
+
+  drawerVisible = false;
+  drawerMode: TradeMode = 'BUY';
+  selectedHolding: HoldingItem | null = null;
 
   constructor(
     private portfolioService: PortfolioService,
@@ -58,6 +64,16 @@ export class DashboardComponent implements OnInit {
       },
       error: err => { this.error = err.message; this.simulating = false; },
     });
+  }
+
+  openDrawer(holding: HoldingItem, mode: TradeMode): void {
+    this.selectedHolding = holding;
+    this.drawerMode = mode;
+    this.drawerVisible = true;
+  }
+
+  onTraded(): void {
+    this.loadPortfolio();
   }
 
   formatCurrency(value: number): string {

@@ -1,0 +1,107 @@
+<nz-drawer
+  [nzVisible]="visible"
+  [nzWidth]="400"
+  [nzTitle]="drawerTitle"
+  (nzOnClose)="close()"
+  nzPlacement="right">
+
+  <ng-template #drawerTitle>
+    <span nz-icon [nzType]="mode === 'BUY' ? 'rise' : 'fall'"
+          [style.color]="mode === 'BUY' ? '#1677ff' : '#ff4d4f'"
+          style="margin-right:8px;"></span>
+    Trade — {{ holding?.symbol }}
+  </ng-template>
+
+  <ng-container *nzDrawerContent>
+    <ng-container *ngIf="holding">
+
+      <!-- Mode Toggle -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <button nz-button
+                [nzType]="mode === 'BUY' ? 'primary' : 'default'"
+                style="flex:1;" (click)="setMode('BUY')">
+          <span nz-icon nzType="arrow-up"></span> Buy More
+        </button>
+        <button nz-button
+                [nzType]="mode === 'SELL' ? 'primary' : 'default'"
+                [nzDanger]="mode === 'SELL'"
+                style="flex:1;" (click)="setMode('SELL')">
+          <span nz-icon nzType="arrow-down"></span> Sell
+        </button>
+      </div>
+
+      <!-- Stock Info -->
+      <div style="background:#fafafa;border-radius:8px;padding:16px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:#8c8c8c;font-size:13px;">Symbol</span>
+          <strong>{{ holding.symbol }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:#8c8c8c;font-size:13px;">Company</span>
+          <span>{{ holding.companyName }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:#8c8c8c;font-size:13px;">Current Price</span>
+          <strong>{{ formatCurrency(holding.currentPrice) }}</strong>
+        </div>
+        <nz-divider style="margin:12px 0;"></nz-divider>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:#8c8c8c;font-size:13px;">Holdings</span>
+          <span>{{ holding.quantity }} shares</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#8c8c8c;font-size:13px;">Avg Buy Price</span>
+          <span>{{ formatCurrency(holding.avgBuyPrice) }}</span>
+        </div>
+      </div>
+
+      <!-- Trade Form -->
+      <form nz-form [formGroup]="tradeForm" nzLayout="vertical">
+        <nz-form-item>
+          <nz-form-label nzRequired>Quantity</nz-form-label>
+          <nz-form-control [nzErrorTip]="mode === 'SELL' ? 'Enter 1 – ' + maxSellQty : 'Enter at least 1'">
+            <nz-input-number
+              formControlName="quantity"
+              [nzMin]="1"
+              [nzMax]="mode === 'SELL' ? maxSellQty : 99999"
+              [nzStep]="1"
+              [nzPrecision]="0"
+              style="width:100%;">
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+
+      <!-- Total Cost / Proceeds -->
+      <div style="background:#f0f5ff;border-radius:8px;padding:16px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#8c8c8c;font-size:13px;">
+            {{ mode === 'BUY' ? 'Estimated Cost' : 'Estimated Proceeds' }}
+          </span>
+          <strong style="font-size:18px;"
+                  [style.color]="mode === 'BUY' ? '#1677ff' : '#52c41a'">
+            {{ formatCurrency(tradeTotal) }}
+          </strong>
+        </div>
+        <p *ngIf="mode === 'SELL'" style="margin:8px 0 0;font-size:12px;color:#8c8c8c;">
+          Max sellable: {{ maxSellQty }} shares
+        </p>
+      </div>
+
+      <nz-alert *ngIf="tradeError" nzType="error" [nzMessage]="tradeError" nzShowIcon style="margin-bottom:16px;"></nz-alert>
+
+      <!-- Submit -->
+      <button nz-button
+              nzType="primary"
+              [nzDanger]="mode === 'SELL'"
+              nzBlock
+              nzSize="large"
+              [nzLoading]="trading"
+              [disabled]="tradeForm.invalid"
+              (click)="onTrade()">
+        {{ mode === 'BUY' ? 'Confirm Buy' : 'Confirm Sell' }}
+      </button>
+
+    </ng-container>
+  </ng-container>
+</nz-drawer>
