@@ -1,6 +1,7 @@
 package com.mockstock.service;
 
 import com.mockstock.dto.response.PortfolioResponse;
+import com.mockstock.dto.response.TradeLimitsResponse;
 import com.mockstock.entity.PortfolioItem;
 import com.mockstock.entity.Stock;
 import com.mockstock.entity.Transaction;
@@ -34,6 +35,26 @@ public class OrderService {
         this.portfolioService = portfolioService;
     }
 
+    private int computeMaxBuyQty(BigDecimal cash, BigDecimal price) {
+        return price.compareTo(BigDecimal.ZERO) > 0
+                ? cash.divideToIntegralValue(price).intValue()
+                : 0;
+    }
+
+    @Transactional(readOnly = true)
+    public TradeLimitsResponse getTradeLimits(String symbol) {
+        Stock stock = stockRepo.findById(symbol)
+                .orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
+
+        BigDecimal cash = portfolioService.getCash();
+        int maxBuy = computeMaxBuyQty(cash, stock.getCurrentPrice());
+
+        PortfolioItem holding = portfolioRepo.findById(symbol).orElse(null);
+        int maxSell = holding != null ? holding.getQuantity() : 0;
+
+        return new TradeLimitsResponse(maxBuy, maxSell);
+    }
+
     @Transactional
     public PortfolioResponse buyStock(String symbol, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -42,11 +63,13 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Stock not found: " + symbol));
 
         BigDecimal price = stock.getCurrentPrice();
-        BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
         BigDecimal cash = portfolioService.getCash();
+        int maxBuyQty = computeMaxBuyQty(cash, price);
 
-        if (cash.compareTo(total) < 0) throw new IllegalArgumentException(
-                String.format("Insufficient cash. Required: %.2f, Available: %.2f", total, cash));
+        if (quantity > maxBuyQty) throw new IllegalArgumentException(
+                String.format("Exceeds maximum buyable quantity. Max: %d, Requested: %d", maxBuyQty, quantity));
+
+        BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
 
         portfolioService.setCash(cash.subtract(total));
 
@@ -78,9 +101,9 @@ public class OrderService {
         PortfolioItem holding = portfolioRepo.findById(symbol)
                 .orElseThrow(() -> new IllegalArgumentException("You do not hold any shares of: " + symbol));
 
-        if (holding.getQuantity() < quantity) throw new IllegalArgumentException(
-                String.format("Insufficient shares. You hold %d but tried to sell %d",
-                        holding.getQuantity(), quantity));
+        int maxSellQty = holding.getQuantity();
+        if (quantity > maxSellQty) throw new IllegalArgumentException(
+                String.format("Exceeds maximum sellable quantity. Max: %d, Requested: %d", maxSellQty, quantity));
 
         BigDecimal price = stock.getCurrentPrice();
         BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));

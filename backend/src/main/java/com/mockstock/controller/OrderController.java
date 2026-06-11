@@ -3,6 +3,7 @@ package com.mockstock.controller;
 import com.mockstock.dto.ApiResponse;
 import com.mockstock.dto.request.OrderRequest;
 import com.mockstock.dto.response.PortfolioResponse;
+import com.mockstock.dto.response.TradeLimitsResponse;
 import com.mockstock.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,12 @@ public class OrderController {
 
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
+    }
+
+    @GetMapping("/limits/{symbol}")
+    public ResponseEntity<ApiResponse<TradeLimitsResponse>> getTradeLimits(@PathVariable String symbol) {
+        TradeLimitsResponse limits = orderService.getTradeLimits(symbol.toUpperCase());
+        return ResponseEntity.ok(ApiResponse.ok(limits, "OK"));
     }
 
     @PostMapping("/buy")
