@@ -8,7 +8,7 @@ export class OrderService {
   constructor(private api: ApiService) {}
 
   getLimits(symbol: string): Observable<TradeLimits> {
-    return this.api.get<TradeLimits>(`/orders/limits/${symbol}`);
+    return this.api.post<TradeLimits>('/orders/limits', { symbol });
   }
 
   buy(req: OrderRequest): Observable<PortfolioResponse> {

@@ -8,10 +8,10 @@ export class StockService {
   constructor(private api: ApiService) {}
 
   getAll(): Observable<Stock[]> {
-    return this.api.get<Stock[]>('/stocks');
+    return this.api.post<Stock[]>('/stocks', {});
   }
 
   getBySymbol(symbol: string): Observable<StockDetail> {
-    return this.api.get<StockDetail>(`/stocks/${symbol}`);
+    return this.api.post<StockDetail>('/stocks/detail', { symbol });
   }
 }
